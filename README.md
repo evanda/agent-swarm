@@ -36,9 +36,20 @@ python3 knowledge/evals/run.py         # golden evals (structural)
 
 ## Using the swarm in another repo
 
-Copy `templates/consumer/` into a project and follow its README (§10A of the
-spec). The swarm installs **dormant**: nothing fires until a human types a
-`/swarm:*` command.
+With the target project cloned alongside this repo, run the installer from here:
+
+```bash
+python3 scripts/install.py <path-to-target-repo> --dry-run   # preview
+python3 scripts/install.py <path-to-target-repo>             # apply
+```
+
+…or, inside Claude Code from this repo, `/install <path-to-target-repo>` — which
+also reconciles prose and walks you through credentials. The installer **merges**
+into an existing `CLAUDE.md` / `.claude/settings.json` (never overwrites, backs up,
+idempotent). `templates/consumer/` is the raw footprint / manual fallback.
+
+The swarm installs **dormant**: nothing fires until a human types a `/swarm:*`
+command. Credential and access model: [`docs/credentials.md`](docs/credentials.md).
 
 ## Self-improvement
 

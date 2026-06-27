@@ -7,3 +7,8 @@ __pycache__/
 
 # Editor / OS cruft
 .DS_Store
+
+# Local-only Claude Code overrides (may hold secrets) and installer backups
+.claude/settings.local.json
+*.bak
+**/*.[0-9]*-[0-9]*.bak

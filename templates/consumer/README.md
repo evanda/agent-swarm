@@ -1,7 +1,15 @@
 # Consumer footprint (activate the swarm in an existing repo)
 
-Copy these files into a project repo to make it **swarm-ready but dormant**
-(§10A, §11). Nothing swarm-related fires until a human types `/swarm:*`.
+> **Preferred path: use the installer.** From the agent-swarm repo, with the
+> target project cloned alongside it, run `/install <path-to-target>` (or
+> `python3 scripts/install.py <path-to-target> --dry-run`). It **merges** into an
+> existing `.claude/settings.json` and `CLAUDE.md` instead of overwriting them,
+> backs up first, and is idempotent. The manual copy below is the fallback for a
+> brand-new repo with no existing config.
+
+These files are the raw footprint the installer lays down. Copy them by hand only
+if you're not using the installer. Nothing swarm-related fires until a human types
+`/swarm:*`.
 
 ```
 my-app/

@@ -77,6 +77,30 @@ has write on its own repo — all the Improver/Scout need (they operate within
 auth requirement — the job still runs Claude on the runner, so it needs option 2
 or 3 configured. Option 1 is the only one that runs the model in your session.
 
+### Routine environment (GitHub access for option 1)
+
+This is the *easy* GitHub case, because the Improver/Scout only ever write to
+**one repo — agent-swarm itself** (`/swarm:scout` files `learning-proposal` issues
+there; `/swarm:improve` reads them, pushes a branch, opens a PR there). There's no
+cross-repo hop, so **no dual-scoped PAT** like the consumer-app flow above.
+
+- **Case A — routine is a Claude Code *web* session on agent-swarm (recommended).**
+  Connecting the environment to agent-swarm with **write** access is enough — the
+  harness's GitHub integration (the same one that opens/merges PRs interactively)
+  covers issues/PRs/branches on the connected repo. **Nothing to inject.**
+- **Case B — routine runs locally / via plain cron (no web integration).** Inject
+  `GITHUB_TOKEN` = a PAT scoped to **agent-swarm only** (Issues RW · Pull requests
+  RW · Contents RW). The plugin's GitHub MCP reads it and git push uses it.
+
+Verify before trusting a schedule: (1) have the session do a harmless read (list
+open issues) to confirm GitHub access; (2) confirm the network policy allows
+outbound to GitHub **and** the web (Scout scans sources via WebSearch/WebFetch).
+
+Cloud gotcha: the plugin's `.mcp.json` defines a **docker-based** GitHub MCP that
+reads `GITHUB_TOKEN`. In a web environment GitHub is already provided by the
+harness and docker-in-docker may not run — rely on the harness integration and
+ignore the plugin's docker MCP if it errors (it's there for local/CLI use).
+
 ## Quick checklist
 
 - [ ] Fine-grained PAT scoped to **target repo + agent-swarm** (Issues RW, PRs RW, Contents RW).

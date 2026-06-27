@@ -84,6 +84,19 @@ The brain changes only via **reviewed PRs**: the Improver (inward) and Scout
 (outward) file `learning-proposal` issues; a human merges. Bump
 `plugins/swarm/.claude-plugin/plugin.json` `version` on every meaningful change.
 
+**Running the loops on your subscription (no API credits).** A Claude Max/Pro
+subscription doesn't include Anthropic API access, so the loops can run three ways
+— pick one:
+
+- **Claude routine (recommended if you have Max):** schedule a Claude Code session
+  that runs `/swarm:improve` and `/swarm:scout`. These execute the loops in-session
+  on your subscription — no API key, no Actions.
+- **GitHub Actions on your subscription:** run `claude setup-token` once, add the
+  output as the repo secret `CLAUDE_CODE_OAUTH_TOKEN`; `improver.yml`/`scout.yml`
+  then run on schedule against your subscription.
+- **GitHub Actions on the API:** set the `ANTHROPIC_API_KEY` secret instead
+  (pay-as-you-go API billing) and swap it back into the workflow `env`.
+
 ## Repo layout & contributing
 
 ```
@@ -100,4 +113,7 @@ Before any structural change: `python3 scripts/validate_plugin.py` and
 ## Operator setup (one-time)
 
 - Tag `v0.1.0` so consumers' pinned `ref` resolves.
-- Add the `ANTHROPIC_API_KEY` repo secret for the Improver/Scout workflows.
+- Decide how the Improver/Scout loops run (see *Self-improvement* above): a
+  scheduled Claude routine (`/swarm:improve`, `/swarm:scout`) on your
+  subscription, or the Actions workflows with `CLAUDE_CODE_OAUTH_TOKEN`
+  (subscription) or `ANTHROPIC_API_KEY` (API).

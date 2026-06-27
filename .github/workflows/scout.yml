@@ -3,6 +3,12 @@ name: scout
 # Outward self-improvement loop (§8). Scans curated SOTA sources and revisit_if
 # triggers, scores findings on the scout-scan scorecard, and files Adopt/Adapt/
 # Retire proposals into the learning queue. Adopts nothing without a reviewed PR.
+#
+# Auth: runs on a Claude subscription via CLAUDE_CODE_OAUTH_TOKEN (no Anthropic
+# API credits needed). Generate it once with `claude setup-token` and add it as
+# the repo secret CLAUDE_CODE_OAUTH_TOKEN. (Alternatively set ANTHROPIC_API_KEY
+# for pay-as-you-go API billing.) Or skip Actions and run /swarm:scout from a
+# scheduled Claude routine — see the README.
 
 on:
   schedule:
@@ -28,7 +34,7 @@ jobs:
 
       - name: Run the Scout
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           claude -p "You are the Scout agent for this repo. Follow plugins/swarm/agents/scout.md exactly:

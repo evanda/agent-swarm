@@ -3,6 +3,12 @@ name: improver
 # Inward self-improvement loop (§8). Reads learning-proposals, runs sampled
 # interrogations, applies edits, runs the evals to confirm no regression, and
 # opens ONE reviewed PR. Never auto-merges.
+#
+# Auth: runs on a Claude subscription via CLAUDE_CODE_OAUTH_TOKEN (no Anthropic
+# API credits needed). Generate it once with `claude setup-token` and add it as
+# the repo secret CLAUDE_CODE_OAUTH_TOKEN. (Alternatively set ANTHROPIC_API_KEY
+# if you prefer pay-as-you-go API billing.) If you'd rather not use Actions at
+# all, run /swarm:improve from a scheduled Claude routine instead — see the README.
 
 on:
   schedule:
@@ -28,7 +34,7 @@ jobs:
 
       - name: Run the Improver
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           claude -p "You are the Improver agent for this repo. Follow plugins/swarm/agents/improver.md exactly:

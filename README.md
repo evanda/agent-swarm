@@ -34,22 +34,36 @@ python3 scripts/validate_plugin.py     # marketplace + plugin structure
 python3 knowledge/evals/run.py         # golden evals (structural)
 ```
 
-## Using the swarm in another repo
+## Using the swarm in another repo → `/install`
 
-With the target project cloned alongside this repo, run the installer from here:
+Clone the target project alongside this repo, then **from a Claude Code session
+in agent-swarm, run:**
+
+```
+/install <path-to-target-repo>
+```
+
+That's the whole bootstrap. `/install` lays down the footprint, **merges** into
+the target's existing `CLAUDE.md` / `.claude/settings.json` (never overwrites,
+backs up, idempotent), reconciles the prose, and then **walks you through
+creating and injecting the GitHub token step by step** and verifies it works —
+you don't need to read any docs first.
+
+The swarm installs **dormant**: nothing fires until a human types a `/swarm:*`
+command.
+
+<details>
+<summary>Running the installer without Claude (plain script)</summary>
 
 ```bash
 python3 scripts/install.py <path-to-target-repo> --dry-run   # preview
 python3 scripts/install.py <path-to-target-repo>             # apply
 ```
 
-…or, inside Claude Code from this repo, `/install <path-to-target-repo>` — which
-also reconciles prose and walks you through credentials. The installer **merges**
-into an existing `CLAUDE.md` / `.claude/settings.json` (never overwrites, backs up,
-idempotent). `templates/consumer/` is the raw footprint / manual fallback.
-
-The swarm installs **dormant**: nothing fires until a human types a `/swarm:*`
-command. Credential and access model: [`docs/credentials.md`](docs/credentials.md).
+This does the file merge but not the guided credential walkthrough. The access
+model and manual token steps are in [`docs/credentials.md`](docs/credentials.md);
+`templates/consumer/` is the raw footprint / manual fallback.
+</details>
 
 ## Self-improvement
 

@@ -273,9 +273,10 @@ def main():
     print("\nNext steps (human):")
     print("  1. Review the diff in the target repo (especially CLAUDE.md / settings.json).")
     print("  2. In Claude Code from the target repo: /plugin install swarm@swarm (project scope), then /reload-plugins.")
-    print("  3. Wire credentials — see docs/credentials.md in agent-swarm. Short version:")
-    print(f"     - GitHub token (env GITHUB_TOKEN) with issues+PR write on BOTH this repo and {central}.")
-    print("     - In Anthropic cloud dev envs, model auth is your session; set GITHUB_TOKEN as an env var/secret.")
+    print("  3. Wire credentials. Easiest: run `/install` (not this script directly) — it")
+    print("     walks you through creating + injecting the GitHub token and verifies it.")
+    print(f"     Manual: a GitHub token (env GITHUB_TOKEN) with issues+PR write on BOTH this repo")
+    print(f"     and {central}. Full guide: docs/credentials.md in agent-swarm.")
     print("  4. Verify dormancy: a plain `claude` session with no /swarm:* typed behaves normally.")
     if dry:
         print("\n(DRY RUN — nothing was written. Re-run without --dry-run to apply.)")

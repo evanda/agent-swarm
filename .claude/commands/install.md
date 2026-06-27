@@ -38,18 +38,46 @@ fuzzy parts and walk the human through credentials.
    and leave the project's own content alone. Edit `constitution.delta.md` to
    capture any obvious repo-specific risk surfaces or stack rules you can infer.
 
-5. **Credentials (guide the human).** Read `docs/credentials.md` and give the
-   human the *specific* actions for their setup. Decide which case applies:
-   - **Anthropic cloud dev env (their default):** model auth is the session — no
-     `ANTHROPIC_API_KEY` needed interactively. They need a GitHub token exported
-     as `GITHUB_TOKEN` (env var/secret on the environment) with **issues + PR
-     write on BOTH the target repo and the central agent-swarm repo** (the swarm
-     files learning-proposals upstream). Note that the cloud harness may already
-     provide GitHub access.
-   - **Central repo automation (improver/scout):** `ANTHROPIC_API_KEY` secret on
-     agent-swarm; the Actions-provided `GITHUB_TOKEN` covers same-repo writes.
-   Spell out exactly where to paste each, and don't ask them to paste secret
-   values into chat or committed files.
+5. **Credentials — walk the human through it; assume they know nothing.** Do NOT
+   just point at a doc. Drive this as an interactive sub-flow. Background for you
+   is in `docs/credentials.md`, but *you* deliver the steps.
+
+   First, **check what already works** — don't make them create a token they don't
+   need. Try a read then a write-scoped check against both repos (e.g. via the
+   GitHub MCP `get_me`, and reading the target + `agent-swarm`). If the
+   environment already has working GitHub access with the right scope, say so and
+   skip to verification.
+
+   If a token is needed, walk them through creating one, step by step:
+   1. Tell them this single token needs to write to **two** repos — the target
+      project (its work) and **agent-swarm** (so the swarm can file
+      learning-proposals upstream). One token, two repos — not repo-to-repo access.
+   2. Send them to **https://github.com/settings/tokens?type=beta** (fine-grained
+      PAT). Walk the form:
+      - **Resource owner:** the account/org owning both repos.
+      - **Repository access:** "Only select repositories" → pick **the target
+        repo AND `agent-swarm`**.
+      - **Permissions:** Repository permissions → **Issues: Read and write**,
+        **Pull requests: Read and write**, **Contents: Read and write**.
+      - Set an expiry, click Generate, copy the token.
+      (Classic PAT with `repo` scope works too if they prefer — mention it as the
+      fallback.)
+   3. **Inject it — never have them paste the value into chat or a committed file.**
+      Pick the method for their environment and give the exact action:
+      - **Anthropic cloud dev env (their default):** add `GITHUB_TOKEN` in the
+        environment's variables/secrets (Settings for the environment on
+        code.claude.com), then restart the session so it's in the env. The plugin
+        `.mcp.json` reads `${GITHUB_TOKEN}`.
+      - **Local CLI:** `export GITHUB_TOKEN=…` in their shell profile, or a
+        gitignored `.claude/settings.local.json` `env` block.
+   4. **Model auth:** tell them interactive `/swarm:*` needs **no**
+      `ANTHROPIC_API_KEY` — their session covers it. The key is only for the
+      central repo's nightly/weekly **workflows** (add as an Actions secret on
+      agent-swarm). Mention it only if they ask about the loops.
+
+   Then **verify the token actually works**: make a real call against both repos
+   (read both; confirm write scope, e.g. list/permissions). Report pass/fail per
+   repo and, on failure, name the most likely missing scope or unselected repo.
 
 6. **Verify & hand off.** Tell them to: review the diff in the target repo,
    commit it there, run `/plugin install swarm@swarm` (project scope) +
@@ -58,4 +86,5 @@ fuzzy parts and walk the human through credentials.
    changes if they want.
 
 Keep the human in the loop at the diff and at credentials — those are the two
-places a mistake is costly.
+places a mistake is costly. Don't end the command until GitHub access is verified
+working against both repos (or the human explicitly defers it).

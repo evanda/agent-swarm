@@ -1,9 +1,10 @@
 # agent-swarm (the central `swarm` brain)
 
 This repo is simultaneously the **marketplace**, the **plugin**, and the
-**knowledge base** for the dev swarm. The complete design is
-[`swarm-master-build-spec.md`](swarm-master-build-spec.md) — the single source of
-truth.
+**knowledge base** for the dev swarm. The original design and rationale is
+[`swarm-master-build-spec.md`](swarm-master-build-spec.md) (see its Addendum +
+[`docs/decisions/`](docs/decisions/) for decisions since); day-to-day usage lives
+in the [README](README.md).
 
 ## Map
 

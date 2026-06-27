@@ -7,7 +7,8 @@ different model. GitHub is the control plane; the swarm installs **dormant** and
 nothing fires until you type a `/swarm:*` command.
 
 This repo is the central brain: the **marketplace**, the **plugin**, and the
-**knowledge base**. Full design: **[swarm-master-build-spec.md](swarm-master-build-spec.md)**.
+**knowledge base**. Design & rationale: **[swarm-master-build-spec.md](swarm-master-build-spec.md)**
+(with an Addendum of decisions since the build); ADRs in [`docs/decisions/`](docs/decisions/).
 
 ## The agents
 

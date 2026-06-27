@@ -1,100 +1,103 @@
 # agent-swarm
 
-The central **`swarm`** brain — marketplace, plugin, and knowledge base for an
-SWE agent swarm. A persistent Orchestrator reads work from GitHub Issues, routes
-each item into one of three risk-based lanes, and delegates to ephemeral,
-single-purpose subagents — each paired with an adversary on a different model.
-GitHub itself is the control plane.
+A team of specialized AI agents that turn GitHub Issues into verified PRs. A
+persistent **Orchestrator** reads an issue, routes it by risk into a lane, and
+delegates to ephemeral subagents — each generator paired with an adversary on a
+different model. GitHub is the control plane; the swarm installs **dormant** and
+nothing fires until you type a `/swarm:*` command.
 
-The complete design and build order live in
-**[swarm-master-build-spec.md](swarm-master-build-spec.md)** — the single source
-of truth.
+This repo is the central brain: the **marketplace**, the **plugin**, and the
+**knowledge base**. Full design: **[swarm-master-build-spec.md](swarm-master-build-spec.md)**.
 
-## What's here
+## The agents
 
-```
-.claude-plugin/marketplace.json   # catalog
-plugins/swarm/                     # the plugin
-  agents/                          # 10 role agents (orchestrator, explorer, …)
-  skills/                          # methodology (route-issue, dialectic, …)
-  commands/                        # entry points (/swarm:start|express|retro)
-  hooks/                           # the one global guard hook
-  .mcp.json                        # shared MCP defaults (github)
-knowledge/                         # constitution, learnings, ledger, sources, evals
-.github/workflows/                 # validate-plugin (CI), improver (nightly), scout (weekly)
-templates/consumer/                # copy into a repo to activate the swarm (dormant)
-scripts/validate_plugin.py         # structural validator (run before changes)
-docs/decisions/                    # ADRs
-```
+| Agent | Job |
+|---|---|
+| **Orchestrator** | triage → route → decompose → delegate → synthesize (never writes code) |
+| **Explorer** | read-only recon; returns a distilled map of the code |
+| **Architect** | turns an ambiguous issue into spec → plan → tasks; records decisions |
+| **Challenger** | attacks the spec before fan-out (different model than Architect) |
+| **Implementer** | builds one task → one PR in its own worktree |
+| **Reviewer** | independent verification of a PR (different model than Implementer) |
+| **Integrator** | resolves conflicts, drives the merge queue |
+| **Scribe** | paper trail: run log, ADRs, follow-up issues, learning-proposals |
+| **Improver** | inward loop: retros/traces/evals → reviewed PRs (nightly) |
+| **Scout** | outward loop: scans SOTA tooling → proposals (weekly) |
 
-## Quick checks
+Work is routed into one of three lanes by a conservative risk rubric — **Express**
+(trivial, reversible), **Standard** (clear, small design), **Deep** (ambiguous,
+cross-cutting, or risk-flagged → spec + human gate). See the spec for the lane
+table and the `risk:*` flags that force Deep.
 
-```bash
-python3 scripts/validate_plugin.py     # marketplace + plugin structure
-python3 knowledge/evals/run.py         # golden evals (structural)
-```
+## Commands
 
-## Using the swarm in another repo → `/install`
+| Command | What it does |
+|---|---|
+| `/swarm:start <issue# \| description>` | triage, route, and run the lane |
+| `/swarm:express <description>` | force the cheap Express lane for a known-trivial fix |
+| `/swarm:status [issue#]` | what each agent is doing now, gates, tokens, links |
+| `/swarm:stop [issue#]` | gracefully halt a cycle (Esc interrupts agents; this cleans up) |
+| `/swarm:retro [scope]` | retrospective → learning-proposals |
+| `/swarm:help` | full in-tool reference |
 
-Clone the target project alongside this repo, then **from a Claude Code session
-in agent-swarm, run:**
+You can also run work async: file/assign an Issue with a `lane:*` (or `triage`)
+label and the scheduled job picks it up — no session needed.
+
+## Progress & debriefs
+
+A swarm run is token-heavy and spreads work across opaque subagents, so every run
+is instrumented:
+
+- **Live checklist** — a single auto-updating comment on the issue, refreshed at
+  each step; `/swarm:status` renders it on demand.
+- **Debrief** — at cycle end the Scribe posts a comprehensive report (what each
+  agent did, decisions, PRs, **token cost**, timeline) to the issue, and
+  optionally commits it to `docs/debriefs/<issue#>.md` (`.swarm/config.json`
+  `debrief`: `issue` | `commit` | `both`).
+
+Both render from the same event log so they can't drift. Details: the `run-log`
+and `debrief` skills.
+
+## Bootstrapping a project
+
+Clone the target project alongside this repo, then from a Claude Code session in
+agent-swarm run:
 
 ```
 /install <path-to-target-repo>
 ```
 
-That's the whole bootstrap. `/install` lays down the footprint, **merges** into
-the target's existing `CLAUDE.md` / `.claude/settings.json` (never overwrites,
-backs up, idempotent), reconciles the prose, and then **walks you through
-creating and injecting the GitHub token step by step** and verifies it works —
-you don't need to read any docs first.
+It writes a tiny footprint into the target (merging into any existing `CLAUDE.md`
+/ `.claude/settings.json`, never overwriting), then walks you through the GitHub
+token setup and verifies it. The target only **references** the central plugin at
+a pinned ref — it never copies the agents/skills, so it can't go stale, and a
+running app session needs no second clone. Adopt central improvements by bumping
+the pin.
 
-The swarm installs **dormant**: nothing fires until a human types a `/swarm:*`
-command.
-
-<details>
-<summary>Running the installer without Claude (plain script)</summary>
-
-```bash
-python3 scripts/install.py <path-to-target-repo> --dry-run   # preview
-python3 scripts/install.py <path-to-target-repo>             # apply
-```
-
-This does the file merge but not the guided credential walkthrough. The access
-model and manual token steps are in [`docs/credentials.md`](docs/credentials.md);
-`templates/consumer/` is the raw footprint / manual fallback.
-</details>
-
-## Observability — progress & debriefs
-
-A swarm run is token-heavy and runs work across many opaque subagents, so every
-run is instrumented and rendered into two human views:
-
-- **Live checklist** — agents emit structured events to `.swarm/run-log.jsonl`;
-  the Scribe mirrors a rendered checklist into a single, edited GitHub issue
-  comment, refreshed at each boundary. `/swarm:status <issue#>` renders it on
-  demand. You see which subagent is doing what, dialectic rounds, gates, PRs, and
-  tokens burned — without reading every subagent.
-- **Debrief** — at cycle end the Scribe produces a comprehensive report (what each
-  agent did, decisions + rejected alternatives, gates, PRs, token cost, candidate
-  learnings, full timeline), posted to the issue and optionally committed to
-  `docs/debriefs/<issue#>.md`. Configure via `.swarm/config.json` `debrief`
-  (`issue` | `commit` | `both`, default `issue`). It's the best onboarding artifact
-  for a new user and a primary input to the self-improvement loop.
-
-Both views render from the same event log via `plugins/swarm/scripts/swarm_log.py`
-— which **ships inside the plugin**, so it's present at runtime in any activated
-repo without cloning agent-swarm. See the `run-log` and `debrief` skills.
+→ **Deeper:** [credentials & access model](docs/credentials.md) ·
+[consumer footprint](templates/consumer/README.md) ·
+[install vs runtime boundary](docs/decisions/0003-install-vs-runtime-boundary.md)
 
 ## Self-improvement
 
-The brain changes only via **reviewed PRs**. The **Improver** (inward: retros,
-traces, evals) and **Scout** (outward: SOTA tooling) propose changes into a
-`learning-proposal` queue; a human merges. Bump
+The brain changes only via **reviewed PRs**: the Improver (inward) and Scout
+(outward) file `learning-proposal` issues; a human merges. Bump
 `plugins/swarm/.claude-plugin/plugin.json` `version` on every meaningful change.
 
-## Operator follow-ups (human-only)
+## Repo layout & contributing
 
-- Tag `v0.1.0` so the consumer `settings.json` pin resolves.
+```
+plugins/swarm/   agents · skills · commands · hooks · scripts (runtime) · .mcp.json
+knowledge/       constitution · learnings · dependencies (ledger) · scout-sources · evals
+scripts/         setup/CI tools (install.py, validate_plugin.py)
+docs/            decisions (ADRs) · debriefs · credentials.md
+templates/       consumer footprint
+```
+
+Before any structural change: `python3 scripts/validate_plugin.py` and
+`python3 knowledge/evals/run.py`. Conventions live in [CLAUDE.md](CLAUDE.md).
+
+## Operator setup (one-time)
+
+- Tag `v0.1.0` so consumers' pinned `ref` resolves.
 - Add the `ANTHROPIC_API_KEY` repo secret for the Improver/Scout workflows.
-- Activate a first real consumer repo and run an issue through end-to-end.

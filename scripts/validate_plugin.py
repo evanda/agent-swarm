@@ -113,7 +113,7 @@ for d in os.listdir(skills_dir) if os.path.isdir(skills_dir) else []:
 
 # --- commands (entry points must be explicit-only) --------------------------
 cmd_dir = os.path.join(ROOT, "plugins/swarm/commands")
-EXPECTED_CMDS = {"start", "express", "retro", "status"}
+EXPECTED_CMDS = {"start", "express", "retro", "status", "help", "stop"}
 found_cmds = set()
 for fn in os.listdir(cmd_dir) if os.path.isdir(cmd_dir) else []:
     if not fn.endswith(".md"):

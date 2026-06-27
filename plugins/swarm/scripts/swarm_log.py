@@ -47,6 +47,10 @@ EVENTS = {
 ICON = {"done": "x", "in_progress": " ", "blocked": " ", "pending": " "}
 MARK = {"in_progress": " ⏳", "blocked": " ⛔", "pending": "", "done": ""}
 
+# The role spine (§2) — used to show which agents are idle in the status board.
+ROLES = ["orchestrator", "explorer", "architect", "challenger", "implementer",
+         "reviewer", "integrator", "scribe", "improver", "scout"]
+
 
 def now_iso():
     return datetime.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -135,6 +139,63 @@ def first(events, name):
         if ev["event"] == name:
             return ev
     return None
+
+
+def last(events, name):
+    found = None
+    for ev in events:
+        if ev["event"] == name:
+            found = ev
+    return found
+
+
+# --- status (compact per-agent board) ---------------------------------------
+def cmd_status(args):
+    events = read_events(args.file, args.cycle)
+    if not events:
+        print(f"No events for cycle {args.cycle} in {args.file}.")
+        return
+    routed = first(events, "lane_routed")
+    done = first(events, "cycle_completed")
+    items = pair_work_items(events)
+    active = [it for it in items if it["status"] in ("in_progress", "blocked")]
+    active_agents = {it["agent"] for it in active}
+    open_gates = [e for e in events if e["event"] == "gate"]
+    open_escs = [e for e in events if e["event"] == "escalation"]
+    last_ev = events[-1]
+
+    lane = (routed or {}).get("lane", "?")
+    risk = (routed or {}).get("detail", "")
+    head = f"🐝 Swarm cycle {args.cycle} — {lane}" + (f" ({risk})" if risk else "")
+    state = "✅ completed" if done else ("⛔ blocked" if any(i['status']=='blocked' for i in active) else "running")
+    print(head)
+    print(f"State: {state} · last activity {last_ev['ts']} · ~{total_tokens(events)/1000:.1f}k tokens")
+    print("")
+    print("Agents:")
+    if active:
+        for it in active:
+            rd = f" (round {it['rounds']})" if it["rounds"] else ""
+            tok = f" · ~{it['tokens']/1000:.1f}k tok" if it["tokens"] else ""
+            flag = "⛔" if it["status"] == "blocked" else "⏳"
+            print(f"  {flag} {it['agent']:<12} {it['label']}{rd}{tok}")
+    else:
+        print("  (no agent currently active)")
+    idle = [r for r in ROLES if r not in active_agents]
+    if idle and not done:
+        print(f"  · idle: {', '.join(idle)}")
+    if open_gates or open_escs:
+        print("")
+        for g in open_gates:
+            print(f"  ⚠️ gate: {g.get('detail','(human gate)')}")
+        for e in open_escs:
+            print(f"  ⛔ escalation: {e.get('detail','(needs human)')}")
+    print("")
+    print("Links:")
+    print(f"  issue   : #{args.cycle}")
+    print(f"  run log : {args.file}")
+    print(f"  checklist: the <!-- swarm:progress --> comment on issue #{args.cycle}")
+    print("\n(For the full live checklist: `swarm_log.py checklist --cycle "
+          f"{args.cycle}`; for the report: `swarm_log.py debrief --cycle {args.cycle}`.)")
 
 
 # --- checklist --------------------------------------------------------------
@@ -298,6 +359,10 @@ def main():
     lg.add_argument("--tokens", type=int)
     lg.add_argument("--data", help="extra JSON object")
     lg.set_defaults(func=cmd_log)
+
+    st = sub.add_parser("status", help="compact per-agent board (who's doing what now)")
+    st.add_argument("--cycle", required=True)
+    st.set_defaults(func=cmd_status)
 
     cl = sub.add_parser("checklist", help="render the live progress checklist")
     cl.add_argument("--cycle", required=True)

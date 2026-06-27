@@ -26,9 +26,9 @@ reviewed on every relevant PR.
 
 - capability: spec-plan-tasks
   posture: adapt
-  upstream: github/spec-kit@latest
-  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify) with our lane gates."
-  revisit_if: "Spec Kit ships native risk-gating / human-gate hooks."
+  upstream: github/spec-kit@v0.11.9
+  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). Spec Kit now exposes native gate detail (run/resume --json, v0.11.4) and a hookable extension/preset model; our wrapper is narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates."
+  revisit_if: "Spec Kit ships native *risk-aware* gating that maps to our auth/data/money/destructive rubric → drop our lane-mapping layer."
 
 - capability: feature-recon (Explorer)
   posture: adapt

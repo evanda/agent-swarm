@@ -1,0 +1,14 @@
+{
+  "id": "router-auth-change",
+  "archetype": "router",
+  "input": {
+    "title": "Rotate JWT signing key",
+    "body": "Swap the HS256 secret used to sign session tokens and invalidate existing sessions.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:deep",
+    "risk": ["risk:auth"],
+    "rationale_contains": ["auth", "session"]
+  }
+}

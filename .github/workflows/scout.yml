@@ -1,0 +1,41 @@
+name: scout
+
+# Outward self-improvement loop (§8). Scans curated SOTA sources and revisit_if
+# triggers, scores findings on the scout-scan scorecard, and files Adopt/Adapt/
+# Retire proposals into the learning queue. Adopts nothing without a reviewed PR.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # weekly, Monday 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run the Scout
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          claude -p "You are the Scout agent for this repo. Follow plugins/swarm/agents/scout.md exactly:
+          scan the sources in knowledge/scout-sources.md and run targeted searches for each revisit_if
+          trigger in knowledge/dependencies.md. Score each finding with the scout-scan scorecard
+          (Fit/Maturity/Maintenance-delta/Portability/Migration-cost/Risk -> Adopt/Adapt/Watch/Pass).
+          File Adopt/Adapt findings (or tripped triggers -> propose Retire) as 'external'-labeled
+          learning-proposal issues. Default to Watch for immature things. Adopt NOTHING without a reviewed PR." \
+            --permission-mode acceptEdits \
+            --allowedTools "Read,Grep,Glob,WebFetch,WebSearch,Bash"

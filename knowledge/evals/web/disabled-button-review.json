@@ -1,0 +1,14 @@
+{
+  "id": "web-disabled-button-review",
+  "archetype": "web",
+  "input": {
+    "title": "Submit button stays disabled after validation passes",
+    "body": "A PR re-enables the submit button by removing the `disabled` attribute once the form is valid. Reviewer must confirm the fix handles async validation and does not introduce a double-submit.",
+    "labels": ["lane:standard"]
+  },
+  "expect": {
+    "lane": "lane:standard",
+    "risk": [],
+    "rationale_contains": ["double-submit", "async"]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "enterprise-sso-rollout",
+  "archetype": "enterprise",
+  "input": {
+    "title": "Add SAML SSO as an alternative login path",
+    "body": "Introduce SAML-based SSO alongside password login for enterprise tenants. Ambiguous tenant-config requirements, cross-cutting across auth and provisioning, public-facing.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:deep",
+    "risk": ["risk:auth", "risk:api"],
+    "rationale_contains": ["ambiguous", "cross-cutting", "auth"]
+  }
+}

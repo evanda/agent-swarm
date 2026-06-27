@@ -1,0 +1,14 @@
+{
+  "id": "android-permission-flow",
+  "archetype": "android",
+  "input": {
+    "title": "Request POST_NOTIFICATIONS at the right lifecycle point",
+    "body": "Move the runtime notification permission request out of onCreate and into a user-initiated action, handling the denied-forever case. Touches the auth-gated settings screen.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:standard",
+    "risk": [],
+    "rationale_contains": ["lifecycle", "denied"]
+  }
+}

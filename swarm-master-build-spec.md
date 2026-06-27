@@ -1,8 +1,22 @@
 # Dev Swarm — Master Build Spec
 
-*Single source of truth for building the swarm. Hand this whole file to Claude Code. It supersedes the four earlier design docs (concept, implementation, adversarial, reuse/scanning), merged and deduplicated here.*
+*The original design and rationale for the swarm. It supersedes the four earlier design docs (concept, implementation, adversarial, reuse/scanning), merged and deduplicated here.*
 
-**Read order for the implementer:** skim §1 for intent, build in the order of §13, refer to the rest as needed. Names in **bold** are canonical — use them verbatim for agent/skill files.
+> **Status: implemented (v0.1.0).** The build described here exists in this repo.
+> This document is retained as the **design rationale** and as the anchor for the
+> `§`-references used throughout the agents, skills, and docs — the conceptual
+> model below is still accurate. For **how to use** the swarm, see the
+> [README](README.md). For **what changed or was decided during/after the build**,
+> see the **[Addendum](#addendum--status--decisions-since-v010)** at the end and the
+> ADRs in [`docs/decisions/`](docs/decisions/).
+>
+> **Naming:** the placeholder `org/swarm` below is the real repo
+> **`evanda/agent-swarm`**; the illustrative JSON (owner email, repository URL) was
+> realized with actual values in the committed `marketplace.json` / `plugin.json`.
+
+**Read order:** skim §1 for intent; §2–§12 are the design; §13 was the build order
+(now done — see the Addendum for status); the Addendum records decisions since.
+Names in **bold** are canonical — they match the agent/skill files verbatim.
 
 ---
 
@@ -327,3 +341,82 @@ Each rung is useful standalone; don't build the whole factory first.
 - **Risk:** `risk:auth` · `risk:data` · `risk:api` · `risk:money` · `risk:destructive`
 - **Status:** `triage` · `spec-review` · `in-progress` · `in-review` · `needs-human` · `blocked`
 - **Improvement:** `learning-proposal` · `external` (Scout) · `retire-candidate` · `meta` (Improver PRs)
+
+---
+
+## Addendum — status & decisions since v0.1.0
+
+What was built, and the decisions that refined the design above. Each decision of
+weight has an ADR in [`docs/decisions/`](docs/decisions/).
+
+### Build status (§13)
+Rungs **1–3 and 5–9 are implemented**: central skeleton, conventions + routing,
+the review split, the Deep lane + dialectic, the paper trail + the global guard
+hook, both self-improvement loops, the cartridges, and the consumer footprint.
+**Rung 4** (activate a real consumer repo and run an issue end-to-end) is the
+remaining human step. The repo is `evanda/agent-swarm`; `v0.1.0` is the pin.
+
+### Commands realized (extends §10B)
+The original three entry commands shipped (`/swarm:start`, `/swarm:express`,
+`/swarm:retro`), plus four added during the build, all explicit-only
+(`disable-model-invocation: true`):
+- `/swarm:status [issue#]` — per-agent board (who's doing what now) + links.
+- `/swarm:stop [issue#]` — graceful halt (Esc interrupts in-session agents; the
+  command releases claimed sub-issues and records the stop).
+- `/swarm:help` — in-tool reference for the whole command set.
+- `/swarm:improve` and `/swarm:scout` — run the inward/outward loops **in-session**
+  so they draw on a Claude subscription rather than the API (see *Loops auth*).
+
+### Observability — progress & debriefs (new; ADR 0002)
+The spec asserted "every run is instrumented" (§4, principle #7) but defined no
+human view. Implemented: a closed run-log event vocabulary in
+`.swarm/run-log.jsonl`, from which two views are **rendered** (so they can't drift)
+by `plugins/swarm/scripts/swarm_log.py`:
+- a **live checklist** mirrored into a single edited GitHub-issue comment, and
+- a comprehensive **debrief** at cycle end (posted to the issue; optionally
+  committed to `docs/debriefs/<issue#>.md` per `.swarm/config.json` `debrief`).
+The `run-log` and `debrief` skills define the contract; the Scribe owns it.
+
+### Reference-not-copy + install/runtime boundary (clarifies §5, §10A, §11; ADR 0003)
+Consumers **reference** the central plugin via a pinned marketplace `ref` (Claude
+Code fetches it into its plugin cache) — they never vendor agents/skills, so they
+can't go stale, and a running app session needs no second clone. Consequence:
+anything used **at runtime** must live inside the plugin (`plugins/swarm/scripts/`,
+invoked via `${CLAUDE_PLUGIN_ROOT}`) so it's fetched too — the run-log renderer and
+the guard hook follow this. **Setup-only** tools (`scripts/install.py`,
+`scripts/validate_plugin.py`) stay central and are not shipped. Activation is via
+`/install <target>` (a guided command that merges into existing `CLAUDE.md` /
+`.claude/settings.json` and walks the user through credentials) backed by
+`scripts/install.py`; `templates/consumer/` is the manual fallback.
+
+### Self-improvement loops — auth & scheduling (extends §8, §12; see docs/credentials.md)
+A Claude Max/Pro subscription does **not** include API access, so the loops can run
+three ways: (1) a scheduled **Claude routine** running `/swarm:improve` /
+`/swarm:scout` — or, with no plugin installed, a prompt referencing the agent files
+directly — on the subscription; (2) **GitHub Actions** on the subscription via a
+`CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); (3) Actions on the API via
+`ANTHROPIC_API_KEY`. `improver.yml`/`scout.yml` default to the OAuth token. The
+loops only ever write to `agent-swarm` itself, so they need single-repo GitHub
+access — not the dual-scoped token a consumer app needs.
+
+### Adversary model diversity (clarifies §7; ADR 0001)
+Agent frontmatter carries a single default model tier; the hard rule "adversary on
+a *different* model than its generator" can't be expressed there, so it's
+documented in `challenger.md` / `reviewer.md` and enforced at dispatch via the
+Orchestrator's subagent model override (`CLAUDE_CODE_SUBAGENT_MODEL`).
+
+### Evals harness (clarifies §8)
+`knowledge/evals/run.py` runs a dependency-free **structural** check by default (so
+CI stays keyless) and exposes a `--llm` path for the live rubric check the Improver
+runs with a key/subscription. Golden tasks cover router/web/android/enterprise.
+
+### Guard hook (realizes §6, §12)
+The single globally-registered hook is `plugins/swarm/hooks/guard.py` (PreToolUse):
+blocks `rm -rf` on broad paths, force-push to protected branches, secret-bearing
+diffs, and edits outside the active worktree. It fails open so it can never wedge a
+plain session.
+
+### ADR index
+- [0001](docs/decisions/0001-initial-swarm-build.md) — initial build & deviations.
+- [0002](docs/decisions/0002-observability-progress-and-debriefs.md) — progress + debriefs.
+- [0003](docs/decisions/0003-install-vs-runtime-boundary.md) — reference-not-copy; install vs runtime.

@@ -65,6 +65,26 @@ model and manual token steps are in [`docs/credentials.md`](docs/credentials.md)
 `templates/consumer/` is the raw footprint / manual fallback.
 </details>
 
+## Observability — progress & debriefs
+
+A swarm run is token-heavy and runs work across many opaque subagents, so every
+run is instrumented and rendered into two human views:
+
+- **Live checklist** — agents emit structured events to `.swarm/run-log.jsonl`;
+  the Scribe mirrors a rendered checklist into a single, edited GitHub issue
+  comment, refreshed at each boundary. `/swarm:status <issue#>` renders it on
+  demand. You see which subagent is doing what, dialectic rounds, gates, PRs, and
+  tokens burned — without reading every subagent.
+- **Debrief** — at cycle end the Scribe produces a comprehensive report (what each
+  agent did, decisions + rejected alternatives, gates, PRs, token cost, candidate
+  learnings, full timeline), posted to the issue and optionally committed to
+  `docs/debriefs/<issue#>.md`. Configure via `.swarm/config.json` `debrief`
+  (`issue` | `commit` | `both`, default `issue`). It's the best onboarding artifact
+  for a new user and a primary input to the self-improvement loop.
+
+Both views render from the same event log (`scripts/swarm_log.py`), so they can't
+drift from what actually happened. See the `run-log` and `debrief` skills.
+
 ## Self-improvement
 
 The brain changes only via **reviewed PRs**. The **Improver** (inward: retros,

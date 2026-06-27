@@ -14,6 +14,9 @@ truth.
 - `.github/workflows/` — `validate-plugin.yml` (CI), `improver.yml` (nightly
   inward), `scout.yml` (weekly outward).
 - `templates/consumer/` — copy into an existing repo to activate the swarm (§10A).
+- `scripts/` — `validate_plugin.py` (CI), `install.py` (bootstrap into a target
+  repo), `swarm_log.py` (run-log + live checklist + debrief rendering).
+- `docs/decisions/` — ADRs · `docs/debriefs/` — per-cycle reports (when committed).
 
 ## Conventions
 

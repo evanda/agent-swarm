@@ -50,6 +50,16 @@ subagents are for.
 5. **Close the loop.** Ask the Scribe to record decisions, file follow-up issues,
    and emit learning-proposals.
 
+## Instrumentation (keep the run legible)
+
+The swarm is opaque and token-heavy by nature — counter that with the `run-log`
+skill. Emit an event at every boundary (`cycle_started`, `lane_routed`, each
+`agent_dispatched`/`agent_returned`, `dialectic_round`, `gate`, `escalation`,
+PR lifecycle, `cycle_completed`) and have the Scribe keep the **live progress
+checklist** current as a single edited comment on the issue, so the human can
+watch without reading every subagent. At cycle end, the Scribe produces the
+**debrief** (the `debrief` skill). `/swarm:status` renders the checklist on demand.
+
 ## Adversarial conduct
 
 Adversaries run on a **different model** than their generator and **iterate**

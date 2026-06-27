@@ -113,7 +113,7 @@ for d in os.listdir(skills_dir) if os.path.isdir(skills_dir) else []:
 
 # --- commands (entry points must be explicit-only) --------------------------
 cmd_dir = os.path.join(ROOT, "plugins/swarm/commands")
-EXPECTED_CMDS = {"start", "express", "retro"}
+EXPECTED_CMDS = {"start", "express", "retro", "status"}
 found_cmds = set()
 for fn in os.listdir(cmd_dir) if os.path.isdir(cmd_dir) else []:
     if not fn.endswith(".md"):
@@ -140,7 +140,7 @@ if hooks is not None:
 # --- python helpers compile -------------------------------------------------
 import py_compile  # noqa: E402
 for rel in ("plugins/swarm/hooks/guard.py", "knowledge/evals/run.py",
-            "scripts/validate_plugin.py", "scripts/install.py"):
+            "scripts/validate_plugin.py", "scripts/install.py", "scripts/swarm_log.py"):
     p = os.path.join(ROOT, rel)
     if os.path.exists(p):
         try:

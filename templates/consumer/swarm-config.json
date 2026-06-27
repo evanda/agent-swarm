@@ -1,4 +1,5 @@
 {
   "central_repo": "evanda/agent-swarm",
-  "cartridge": "release-web"
+  "cartridge": "release-web",
+  "debrief": "issue"
 }

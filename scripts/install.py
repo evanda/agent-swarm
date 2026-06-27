@@ -193,13 +193,15 @@ def create_if_absent_config(target, central, cartridge, force):
             existing["central_repo"] = central; changed = True
         if "cartridge" not in existing:
             existing["cartridge"] = cartridge; changed = True
+        if "debrief" not in existing:
+            existing["debrief"] = "issue"; changed = True
         if changed:
             backup(path); write_json(path, existing)
             record("merged", path, "added missing keys")
         else:
             record("unchanged", path, "already configured")
         return
-    write_json(path, {"central_repo": central, "cartridge": cartridge})
+    write_json(path, {"central_repo": central, "cartridge": cartridge, "debrief": "issue"})
     record("created" if existing is None else "overwrote", path, f"central={central}, cartridge={cartridge}")
 
 
@@ -217,7 +219,7 @@ def create_if_absent_delta(target, cartridge, force):
 
 
 def ensure_dirs(target):
-    for d in ("specs", "docs/decisions"):
+    for d in ("specs", "docs/decisions", "docs/debriefs"):
         p = os.path.join(target, d)
         keep = os.path.join(p, ".gitkeep")
         if os.path.exists(p):

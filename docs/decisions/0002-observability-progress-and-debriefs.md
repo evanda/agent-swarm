@@ -26,8 +26,11 @@ Instrument every boundary as structured events in `.swarm/run-log.jsonl`, and
    optionally committed to `docs/debriefs/<issue#>.md`, configurable via
    `.swarm/config.json` `debrief` (`issue` | `commit` | `both`; default `issue`).
 
-Mechanism: `scripts/swarm_log.py` (log / checklist / debrief / cycles) is the one
-deterministic renderer; the `run-log` and `debrief` skills define the contract;
+Mechanism: `plugins/swarm/scripts/swarm_log.py` (log / checklist / debrief /
+cycles) is the one deterministic renderer — **shipped inside the plugin** so it is
+fetched into a consumer's plugin cache and reachable at runtime via
+`${CLAUDE_PLUGIN_ROOT}` without cloning agent-swarm (see ADR 0003); the `run-log`
+and `debrief` skills define the contract;
 the Scribe owns emission and publishing; the Orchestrator drives the boundaries.
 
 ## Rejected alternatives

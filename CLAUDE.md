@@ -8,14 +8,16 @@ truth.
 ## Map
 
 - `plugins/swarm/` — the plugin: `agents/` (10 roles), `skills/` (methodology),
-  `commands/` (entry points), `hooks/` (the one global guard), `.mcp.json`.
+  `commands/` (entry points), `hooks/` (the one global guard), `.mcp.json`,
+  `scripts/` (runtime tools shipped to consumers, e.g. `swarm_log.py`).
 - `knowledge/` — `constitution.md` (always-on rules), `learnings.md`,
   `dependencies.md` (divergence ledger), `scout-sources.md`, `evals/`.
 - `.github/workflows/` — `validate-plugin.yml` (CI), `improver.yml` (nightly
   inward), `scout.yml` (weekly outward).
 - `templates/consumer/` — copy into an existing repo to activate the swarm (§10A).
-- `scripts/` — `validate_plugin.py` (CI), `install.py` (bootstrap into a target
-  repo), `swarm_log.py` (run-log + live checklist + debrief rendering).
+- `scripts/` — central/setup-only tools (NOT shipped to consumers):
+  `validate_plugin.py` (CI), `install.py` (one-time bootstrap into a target repo,
+  assumes both repos cloned). Runtime tools live in `plugins/swarm/scripts/`.
 - `docs/decisions/` — ADRs · `docs/debriefs/` — per-cycle reports (when committed).
 
 ## Conventions

@@ -14,7 +14,7 @@ by the Scribe.
 ## Generate
 
 ```
-python3 scripts/swarm_log.py debrief --cycle <issue#>
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" debrief --cycle <issue#>
 ```
 
 This produces a markdown report with: header (lane, risk, timing, subagent count,

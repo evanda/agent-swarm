@@ -15,12 +15,14 @@ what happened and what was decided; you do not decide.
    skill into `docs/decisions/`. Capture the decision, context, and the
    alternatives that were rejected and why.
 2. **Run log + live checklist.** Per the `run-log` skill, append a structured
-   event to `.swarm/run-log.jsonl` (via `scripts/swarm_log.py log`) for each
-   significant step — lane chosen, agents dispatched/returned, dialectic rounds,
-   gates, PRs, token/cost notes. After each boundary, render the checklist
+   event to the working repo's `.swarm/run-log.jsonl` (via
+   `"${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" log`) for each significant step —
+   lane chosen, agents dispatched/returned, dialectic rounds, gates, PRs,
+   token/cost notes. After each boundary, render the checklist
    (`swarm_log.py checklist --cycle <issue#>`) and **edit the single
    `<!-- swarm:progress -->` comment on the issue in place** so the human has a
-   live window into the otherwise-opaque run.
+   live window into the otherwise-opaque run. The helper ships in the plugin, so
+   it's present even though agent-swarm isn't cloned here.
 3. **Follow-up issues.** Turn discovered-but-out-of-scope work into new GitHub
    Issues with a `triage` label, linked to the originating issue.
 4. **Learning-proposals.** From retros, interrogations, and traces, emit

@@ -82,8 +82,9 @@ run is instrumented and rendered into two human views:
   (`issue` | `commit` | `both`, default `issue`). It's the best onboarding artifact
   for a new user and a primary input to the self-improvement loop.
 
-Both views render from the same event log (`scripts/swarm_log.py`), so they can't
-drift from what actually happened. See the `run-log` and `debrief` skills.
+Both views render from the same event log via `plugins/swarm/scripts/swarm_log.py`
+— which **ships inside the plugin**, so it's present at runtime in any activated
+repo without cloning agent-swarm. See the `run-log` and `debrief` skills.
 
 ## Self-improvement
 

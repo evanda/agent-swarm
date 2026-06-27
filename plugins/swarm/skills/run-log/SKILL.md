@@ -13,16 +13,18 @@ instrumentation principle (#7) made concrete.
 
 ## Emit events (every agent, at every boundary)
 
-Use the helper — do not hand-write JSONL:
+Use the helper — do not hand-write JSONL. It **ships inside the plugin**, so it is
+present at runtime in any activated repo (no agent-swarm clone needed); always
+invoke it via `${CLAUDE_PLUGIN_ROOT}`:
 
 ```
-python3 scripts/swarm_log.py log --cycle <issue#> --event <type> [--agent ..] \
-    [--lane ..] [--task ..] [--detail "..."] [--round N] [--tokens N] \
-    [--status pending|in_progress|done|blocked] [--data '{...}']
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" log --cycle <issue#> \
+    --event <type> [--agent ..] [--lane ..] [--task ..] [--detail "..."] \
+    [--round N] [--tokens N] [--status pending|in_progress|done|blocked] [--data '{...}']
 ```
 
-(`scripts/swarm_log.py` lives in the central repo; in a consumer it is reached via
-the activated plugin's install. The log file defaults to `.swarm/run-log.jsonl`.)
+The log is written to the **working repo's** `.swarm/run-log.jsonl` (override with
+`--file`), kept relative to the repo you're operating in — not the plugin cache.
 
 ### Event vocabulary (closed set)
 
@@ -50,7 +52,7 @@ visible.
 The Orchestrator (via the Scribe) keeps a **single GitHub issue comment** current,
 refreshed at every boundary:
 
-1. Render: `python3 scripts/swarm_log.py checklist --cycle <issue#>`.
+1. Render: `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" checklist --cycle <issue#>`.
 2. The output is wrapped in `<!-- swarm:progress cycle=N -->` … `<!-- /swarm:progress -->`
    markers. **Find the existing progress comment and edit it in place** (match the
    marker); create it once at `cycle_started` if absent. One comment, edited —

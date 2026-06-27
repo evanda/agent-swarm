@@ -140,7 +140,8 @@ if hooks is not None:
 # --- python helpers compile -------------------------------------------------
 import py_compile  # noqa: E402
 for rel in ("plugins/swarm/hooks/guard.py", "knowledge/evals/run.py",
-            "scripts/validate_plugin.py", "scripts/install.py", "scripts/swarm_log.py"):
+            "scripts/validate_plugin.py", "scripts/install.py",
+            "plugins/swarm/scripts/swarm_log.py"):
     p = os.path.join(ROOT, rel)
     if os.path.exists(p):
         try:

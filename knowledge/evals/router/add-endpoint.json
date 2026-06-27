@@ -1,0 +1,14 @@
+{
+  "id": "router-add-endpoint",
+  "archetype": "router",
+  "input": {
+    "title": "Add a /health/ready readiness endpoint",
+    "body": "Add a small readiness probe endpoint alongside the existing liveness one. Clear intent, small surface, internal only.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:standard",
+    "risk": [],
+    "rationale_contains": ["clear intent", "small"]
+  }
+}

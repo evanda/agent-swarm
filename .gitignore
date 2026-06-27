@@ -1,0 +1,9 @@
+# Runtime instrumentation (state lives in Git, but the raw run log is local)
+.swarm/run-log.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor / OS cruft
+.DS_Store

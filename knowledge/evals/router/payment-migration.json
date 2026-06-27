@@ -1,0 +1,14 @@
+{
+  "id": "router-payment-migration",
+  "archetype": "router",
+  "input": {
+    "title": "Migrate prices column from integer cents to decimal",
+    "body": "Change the prices table to a decimal type and backfill existing rows. Affects billing and the public pricing API.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:deep",
+    "risk": ["risk:money", "risk:data", "risk:api"],
+    "rationale_contains": ["migration", "billing"]
+  }
+}

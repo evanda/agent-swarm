@@ -1,0 +1,13 @@
+{
+  "name": "swarm",
+  "owner": { "name": "Evanda", "email": "evanda@gmail.com" },
+  "metadata": { "description": "Central dev-swarm brain: agents, skills, hooks." },
+  "plugins": [
+    {
+      "name": "swarm",
+      "source": "./plugins/swarm",
+      "description": "Orchestrator + role agents, skills, hooks for the dev swarm.",
+      "category": "development"
+    }
+  ]
+}

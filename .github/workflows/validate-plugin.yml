@@ -1,0 +1,28 @@
+name: validate-plugin
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate marketplace + plugin structure
+        run: python3 scripts/validate_plugin.py
+      - name: Validate golden evals (structural)
+        run: python3 knowledge/evals/run.py
+      - name: Smoke-test the guard hook
+        run: |
+          set -e
+          echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' \
+            | python3 plugins/swarm/hooks/guard.py && { echo "guard failed to block rm -rf /"; exit 1; } || true
+          echo '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' \
+            | python3 plugins/swarm/hooks/guard.py || { echo "guard wrongly blocked a benign command"; exit 1; }
+          echo "guard hook behaves as expected"

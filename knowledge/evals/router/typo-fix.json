@@ -1,0 +1,14 @@
+{
+  "id": "router-typo-fix",
+  "archetype": "router",
+  "input": {
+    "title": "Fix typo in onboarding tooltip",
+    "body": "The word 'recieve' should be 'receive' in the welcome tooltip. Covered by snapshot tests.",
+    "labels": []
+  },
+  "expect": {
+    "lane": "lane:express",
+    "risk": [],
+    "rationale_contains": ["reversible", "bounded"]
+  }
+}

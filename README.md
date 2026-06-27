@@ -97,6 +97,34 @@ subscription doesn't include Anthropic API access, so the loops can run three wa
 - **GitHub Actions on the API:** set the `ANTHROPIC_API_KEY` secret instead
   (pay-as-you-go API billing) and swap it back into the workflow `env`.
 
+**Routine prompt (no install needed).** A scheduled session runs inside a checkout
+of this repo, so the role instructions are already present as files — the routine
+doesn't need the plugin installed; it can point Claude straight at them. Use this
+prompt to run both loops nightly in one job (scout first, so the Improver has
+proposals to act on):
+
+```
+You are running in a checkout of the agent-swarm repo. Run its self-improvement
+loops in order, and merge nothing:
+
+1. Act as the Scout — follow plugins/swarm/agents/scout.md and the scout-scan /
+   eval-dependency skills: scan knowledge/scout-sources.md and the revisit_if
+   triggers in knowledge/dependencies.md, score findings (default Watch), and file
+   Adopt/Adapt/Retire findings as `external` learning-proposal issues.
+
+2. Then act as the Improver — follow plugins/swarm/agents/improver.md: process the
+   open learning-proposal issues, apply the smallest correct edits, run
+   `python3 knowledge/evals/run.py --llm` and confirm NO regression, and open ONE
+   PR labeled `meta`. Do not merge it.
+
+Finish with a one-paragraph summary (issues filed, PR link, eval result).
+```
+
+(Installing the plugin is only needed if you want the `/swarm:scout` /
+`/swarm:improve` slash commands interactively — load it with
+`/plugin marketplace add <path-to-this-repo>` → `/plugin install swarm@swarm` →
+`/reload-plugins`. The routine above works without it.)
+
 ## Repo layout & contributing
 
 ```

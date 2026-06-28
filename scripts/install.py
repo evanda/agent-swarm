@@ -133,9 +133,17 @@ def merge_settings(target, central, ref):
     prev = mkts.get("swarm", {}).get("source") if isinstance(mkts.get("swarm"), dict) else None
     mkts["swarm"] = {"source": desired_src}
 
-    enabled = existing.setdefault("enabledPlugins", [])
-    if "swarm@swarm" not in enabled:
-        enabled.append("swarm@swarm")
+    # enabledPlugins is an object ({"plugin@marketplace": true}) in current
+    # Claude Code; older settings used a list. Support both, preferring the
+    # object form for new files.
+    enabled = existing.setdefault("enabledPlugins", {})
+    if isinstance(enabled, dict):
+        enabled.setdefault("swarm@swarm", True)
+    elif isinstance(enabled, list):
+        if "swarm@swarm" not in enabled:
+            enabled.append("swarm@swarm")
+    else:
+        sys.exit(f"ERROR: {path} 'enabledPlugins' is neither object nor list; fix it before installing.")
 
     after = json.dumps(existing, sort_keys=True)
     if before == after:

@@ -34,7 +34,7 @@ table and the `risk:*` flags that force Deep.
 
 | Command | What it does |
 |---|---|
-| `/swarm:start <issue# \| description>` | triage, route, and run the lane |
+| `/swarm:start <issue# \| description>` | triage, route, and run the lane — or, on an issue with prior state, resume that cycle from its frontier |
 | `/swarm:express <description>` | force the cheap Express lane for a known-trivial fix |
 | `/swarm:status [issue#]` | what each agent is doing now, gates, tokens, links |
 | `/swarm:stop [issue#]` | gracefully halt a cycle (Esc interrupts agents; this cleans up) |

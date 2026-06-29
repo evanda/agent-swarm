@@ -26,6 +26,7 @@ on what, gates/escalations, tokens burned, and the links to dig in.
    - Note the local **run log** path (shown by the board).
 4. If the cycle is complete, offer the full report via the `debrief` skill. If it
    looks stuck (open gate/escalation, no recent activity), say so and point at
-   `/swarm:stop` or the human gate.
+   the human gate, `/swarm:stop`, or — if a prior run was interrupted —
+   `/swarm:start <issue#>` to resume it from the frontier.
 
 Keep it to a tight, scannable summary — this is the "glance and know" command.

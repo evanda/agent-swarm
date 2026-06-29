@@ -33,7 +33,10 @@ Steps:
    (`swarm_log.py checklist --cycle <issue#>`) and update the
    `<!-- swarm:progress -->` comment so it shows ✅/⛔ stopped.
 5. **Report** what was released (sub-issues, labels) and what was left as-is (open
-   PRs, branches/worktrees), and how to resume (`/swarm:start <issue#>`).
+   PRs, branches/worktrees). To resume later, the human re-runs
+   `/swarm:start <issue#>`: it detects the prior state and continues the cycle
+   from its frontier (the `resume-cycle` skill) rather than starting over — no
+   work is redone.
 
 Do not delete branches or worktrees, and do not revert merged work — stopping is
 about releasing claims and recording state, not destroying progress.

@@ -68,6 +68,17 @@ green, risk addressed) or the lane's turn cap. **Deadlock is a signal:** surface
 both positions and the crux to the human, or invoke a one-shot Judge for
 low-stakes ties. High-risk ties always go to a human.
 
+## Resuming an interrupted cycle
+
+Recovery is not a thread resume — you are reconstructed from the durable record,
+not reattached to a conversation. When a cycle is re-entered (the human re-runs
+`/swarm:start <issue#>` on an issue with prior state), run the **`resume-cycle`**
+skill: rehydrate from the run-log + issue graph + PRs/worktrees, reconcile against
+ground truth (reality beats the log), compute the frontier, and re-dispatch **only
+the incomplete stages** — including the legs only you drive (Reviewer on a
+different model, Integrator merge, Scribe debrief). Resuming a single subagent
+recovers only that leg; the pipeline around it is yours to rebuild.
+
 ## Human gates
 
 - Deep-lane specs require a human gate (`spec-review`) before fan-out.

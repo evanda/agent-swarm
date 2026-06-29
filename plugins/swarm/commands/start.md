@@ -12,7 +12,23 @@ types it, never by model inference.
 
 **Target:** `$ARGUMENTS` (a GitHub issue number, URL, or a free-text description).
 
-Run the full flow:
+**First: is this a fresh run or a resume?** A cycle is identified by its issue#,
+not by a conversation — so `/swarm:start <issue#>` on an issue that already has
+prior state means *continue that cycle*, not start it over. Before routing, check
+for prior state:
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" status --cycle <issue#>
+```
+
+If it reports events (or the issue already carries a `lane:*` label / a
+`<!-- swarm:progress -->` checklist comment), this is a **resume**: confirm with
+the human — *"cycle N has prior state from M events (lane X, last activity …) —
+resume from the frontier, or re-route fresh?"* — and unless they choose re-route,
+hand off to the **`resume-cycle`** skill and stop here. Run the fresh flow below
+only when there is no prior state (or the human chose to re-route).
+
+Fresh-run flow:
 
 1. If given a description rather than an issue, offer to file an Issue first
    (intake is GitHub Issues). If given an issue number/URL, read it.

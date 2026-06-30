@@ -1,0 +1,36 @@
+{
+  "id": "resume-interrupted-cycle",
+  "archetype": "resume",
+  "input": {
+    "description": "Cycle 99 interrupted mid-run. Two tasks decomposed: t1 completed (PR #50 merged, agent_returned logged as done); t2 in-progress (agent_dispatched for implementer and reviewer logged, no PR, no agent_returned, worktree present with uncommitted changes). Ground truth: no open PRs, PR #50 merged (t1), sub-issue t2 open with label in-progress.",
+    "cycle": 99,
+    "run_log_summary": {
+      "events_in_order": [
+        "cycle_started",
+        "lane_routed(lane:deep)",
+        "agent_dispatched(implementer, t1: add /health/ready endpoint)",
+        "pr_opened(PR #50)",
+        "pr_merged(PR #50)",
+        "agent_returned(implementer, t1, status=done)",
+        "agent_dispatched(implementer, t2: update schema migration)",
+        "agent_dispatched(reviewer, t2: update schema migration)"
+      ],
+      "last_event": "agent_dispatched(reviewer, t2)"
+    },
+    "ground_truth": {
+      "open_prs": [],
+      "merged_prs": ["PR #50 — t1: add /health/ready endpoint"],
+      "sub_issues": {
+        "t1": "closed",
+        "t2": "open, label: in-progress, assignee: implementer"
+      },
+      "worktrees": {
+        "t2": "present, uncommitted changes"
+      }
+    }
+  },
+  "expect": {
+    "frontier": "t2 must be resumed (not re-dispatched from scratch); t1 must NOT be redone",
+    "rationale_contains": ["t1", "merged", "t2", "in-progress", "resume"]
+  }
+}

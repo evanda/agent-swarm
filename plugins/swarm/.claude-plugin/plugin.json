@@ -1,6 +1,6 @@
 {
   "name": "swarm",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Dev swarm: orchestrator and specialized role agents, skills, and guardrail hooks.",
   "author": { "name": "Evanda" },
   "repository": "https://github.com/evanda/agent-swarm",

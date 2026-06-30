@@ -26,8 +26,8 @@ reviewed on every relevant PR.
 
 - capability: spec-plan-tasks
   posture: adapt
-  upstream: github/spec-kit@v0.11.9
-  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). Spec Kit now exposes native gate detail (run/resume --json, v0.11.4) and a hookable extension/preset model; our wrapper is narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates."
+  upstream: github/spec-kit@v0.12.1
+  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). v0.12.0 made agent-context extension a full opt-in (previously default-on) and tightened workflow validation (gate validate() crash fix, quote-aware pipe-filter detection, fan-in unknown-step rejection). v0.12.1 fixed check-prerequisites writing feature.json unexpectedly; CI/bash portability improvements. Our wrapper stays narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates — revisit_if trigger (native risk-aware gating) not tripped."
   revisit_if: "Spec Kit ships native *risk-aware* gating that maps to our auth/data/money/destructive rubric → drop our lane-mapping layer."
 
 - capability: feature-recon (Explorer)
@@ -51,6 +51,6 @@ reviewed on every relevant PR.
 - capability: agent-orchestration
   posture: author
   upstream: null
-  delta: "We own the Orchestrator: /swarm:start fan-out to role agents, swarm_log.py run-log for cross-session durability + resume (resume-cycle), and adversarial gates (dialectic/red-team/independent reviewer). Claude Code Dynamic Workflows (research preview 2026-05-28, requires v2.1.154+) now provides a native fan-out substrate (JS orchestration script, <=16 concurrent / 1000 total agents, same-session resume, adversarial cross-check pattern) covering the execution mechanics we hand-roll — but not our role/lane/gate semantics or cross-session-durable run-log."
+  delta: "We own the Orchestrator: /swarm:start fan-out to role agents, swarm_log.py run-log for cross-session durability + resume (resume-cycle), and adversarial gates (dialectic/red-team/independent reviewer). Dynamic Workflows (Claude Code ≥ v2.1.154; GA as of ~2026-06, no longer labeled research preview) provides a native fan-out substrate (JS orchestration script, ≤16 concurrent / 1000 total agents, same-session resume, adversarial cross-check pattern) covering the execution mechanics we hand-roll — but not our role/lane/gate semantics or cross-session-durable run-log. Condition 1 of revisit_if (preview graduation) appears met; Condition 2 (cross-session resume) is NOT met: 'If you exit Claude Code while a workflow is running, the next session starts the workflow fresh.'"
   revisit_if: "Dynamic Workflows exits research preview with a stable scripting API AND supports cross-session-durable resume → spike adapting /swarm:start's fan-out onto it while keeping our role/lane/gate semantics + run-log; downgrade this row to `adapt`."
 ```

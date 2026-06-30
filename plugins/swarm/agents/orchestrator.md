@@ -27,10 +27,16 @@ subagents are for.
 
 ## The flow
 
-1. **Triage & route.** Run the `route-issue` skill on the issue. It returns a
-   lane (`lane:express` / `lane:standard` / `lane:deep`) plus any risk flags.
-   Stamp the labels on the issue. Risk flags (`risk:auth|money|data|api|destructive`)
-   or secrets force the Deep lane regardless of apparent size.
+1. **Claim, then triage & route.** Before stamping any `lane:*` labels, post a
+   machine-readable claim comment on the issue so any async job-picker sees it
+   as taken:
+   `🐝 Swarm Orchestrator — interactive run started <!-- swarm:claim mode=interactive -->`
+   Then run the `route-issue` skill. It returns a lane (`lane:express` /
+   `lane:standard` / `lane:deep`) plus any risk flags. Stamp `lane:*` and risk
+   labels **after** the claim is posted — `lane:*` labels applied before a claim
+   comment can silently trigger a parallel async run on the same issue.
+   Risk flags (`risk:auth|money|data|api|destructive`) or secrets force the Deep
+   lane regardless of apparent size.
 2. **Run the lane:**
    - **Express** — bounded, reversible, tests exist, single component, no risk:
      delegate one Implementer → one Reviewer (single pass, 1 round) → merge queue.
@@ -44,21 +50,35 @@ subagents are for.
      `red-team` when any risk flag is present.
 3. **Decompose** into sub-issues — one delegatable unit per Implementer. Each
    sub-issue is a lock (claim-before-work): the Implementer assigns itself before
-   starting.
+   starting. **Batch micro-tasks** (trivially small, same component) into one
+   sub-issue rather than N separate lifecycles — Implementer lifecycle overhead is
+   substantial. **Maximize the independent set** (tasks that can fan out in
+   parallel); name the serial spine explicitly. If it exceeds 3 sequential hops,
+   challenge the decomposition before fan-out.
 4. **Synthesize.** Collect condensed results, resolve cross-task questions,
    update the issue graph, and report status to the human in plain terms.
+   **If an agent crashed or was interrupted mid-run:** verify its artifacts against
+   its spec/critique before advancing any gate — partial edits look complete (fresh
+   mtimes, no commit). Check: intended files changed and complete? Worktree
+   committed? PR event in run-log? Treat an unverified crash as "not done" until
+   confirmed; re-dispatch rather than advance on unverified state.
 5. **Close the loop.** Ask the Scribe to record decisions, file follow-up issues,
    and emit learning-proposals.
 
 ## Instrumentation (keep the run legible)
 
 The swarm is opaque and token-heavy by nature — counter that with the `run-log`
-skill. Emit an event at every boundary (`cycle_started`, `lane_routed`, each
+skill. **You (the Orchestrator) are responsible for emitting every run-log
+event** — this is not delegated to subagents. Whether you spawn a branded
+`swarm:*` agent or a general-purpose Agent-tool subagent, emit `agent_dispatched`
+before the spawn and `agent_returned` (with `--tokens` and `--status`) when it
+returns. A run that skips these events cannot produce a debrief or live checklist.
+Emit at every boundary: `cycle_started`, `lane_routed`, each
 `agent_dispatched`/`agent_returned`, `dialectic_round`, `gate`, `escalation`,
-PR lifecycle, `cycle_completed`) and have the Scribe keep the **live progress
-checklist** current as a single edited comment on the issue, so the human can
-watch without reading every subagent. At cycle end, the Scribe produces the
-**debrief** (the `debrief` skill). `/swarm:status` renders the checklist on demand.
+PR lifecycle, `cycle_completed`. Have the Scribe keep the **live progress
+checklist** current as a single edited comment on the issue. At cycle end, the
+Scribe produces the **debrief** (the `debrief` skill). `/swarm:status` renders
+the checklist on demand.
 
 ## Adversarial conduct
 

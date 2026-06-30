@@ -24,7 +24,12 @@ failure.**
    contract guarantees.
 4. **Cheaper alternatives** — is there a smaller change that meets the acceptance
    criteria? **Steelman it** even if you don't ultimately favor it.
-5. **Risk** — auth, money, data/migration, public API, destructive ops. Map each
+5. **UX & usability** (user-facing work) — missing visibility of state (does the
+   user see what changed?), hidden affordances, undersized tap targets, missing
+   feedback on action, silent empty/error states. Absent or functional-only
+   acceptance criteria for a UI task is a blocker — force the spec to state the
+   usability bar.
+6. **Risk** — auth, money, data/migration, public API, destructive ops. Map each
    to a mitigation or a human gate.
 
 ## Critique protocol (`dialectic` skill schema)

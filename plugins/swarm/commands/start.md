@@ -32,14 +32,20 @@ Fresh-run flow:
 
 1. If given a description rather than an issue, offer to file an Issue first
    (intake is GitHub Issues). If given an issue number/URL, read it.
-2. Run the **`route-issue`** skill → stamp `lane:*` and any `risk:*` labels, with
+2. **Claim before labelling.** Post a machine-readable claim comment on the issue
+   *before* applying any `lane:*` labels — async job-pickers watch for `lane:*`
+   and will start a parallel run if none is present:
+   `🐝 Swarm Orchestrator — interactive run started <!-- swarm:claim mode=interactive -->`
+   If an existing claim comment is already present from a different run, surface
+   it to the human before proceeding.
+3. Run the **`route-issue`** skill → stamp `lane:*` and any `risk:*` labels, with
    a one-paragraph rationale.
-3. Execute the chosen lane by **delegating to subagents** (Explorer, Architect↔
+4. Execute the chosen lane by **delegating to subagents** (Explorer, Architect↔
    Challenger, Implementer↔Reviewer, Integrator) — you never write code yourself
    and you never hold raw search/diff output.
-4. Honor the human gates: Deep-lane specs pause at `spec-review`; anything
+5. Honor the human gates: Deep-lane specs pause at `spec-review`; anything
    `needs-human` stops and asks.
-5. Synthesize condensed results, keep the issue graph current, and ask the Scribe
+6. Synthesize condensed results, keep the issue graph current, and ask the Scribe
    to record decisions and file follow-ups.
 
 Report status to the human in plain terms at each lane boundary.

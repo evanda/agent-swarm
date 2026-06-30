@@ -42,6 +42,13 @@ The log is written to the **working repo's** `.swarm/run-log.jsonl` (override wi
 | `note` | freeform annotation | any |
 | `cycle_completed` | cycle ends (shipped or stopped) | Orchestrator |
 
+**Who emits `agent_dispatched`/`agent_returned`:** Always the Orchestrator —
+regardless of whether the subagent is a branded `swarm:*` agent or a general-
+purpose Agent-tool subagent. Branded agents may emit their own internal events
+(`decision`, `dialectic_round`, `pr_opened`/`pr_merged`, `note`), but the
+dispatch/return pair is the Orchestrator's responsibility. A cycle that skips
+these events will produce an empty checklist and an unrenderable debrief.
+
 **Pairing:** `agent_dispatched` and `agent_returned` are matched by
 `(agent, task|detail)` — keep `--detail`/`--task` identical across the pair so the
 checklist closes the item. Record `--tokens` when known (even rough) so cost is

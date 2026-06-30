@@ -26,6 +26,10 @@ fix.
   coupling?
 - **Contracts & migrations** — external API shape, backward compatibility, data
   safety.
+- **UX & usability** (user-facing tasks) — visibility of state change, viewport
+  follows update, tap targets ≥ 44 pt/dp and non-overlapping, feedback on action,
+  empty/error states handled. Missing UX acceptance criteria in the spec is a
+  concern — flag it.
 
 ## Finding protocol (`dialectic` schema + confidence)
 

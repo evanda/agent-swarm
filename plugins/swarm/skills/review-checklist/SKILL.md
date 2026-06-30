@@ -35,6 +35,18 @@ so is inventing blockers — score by confidence.
 **Hygiene**
 - No secrets/keys in the diff; no debug cruft; follows repo conventions.
 
+**UX & usability** (user-facing tasks only)
+- Visibility of state: does the user see what changed? Does the viewport follow
+  the updated element (enabling content ≠ content appearing off-screen)?
+- Affordance & discoverability: are interactive elements visibly actionable?
+- Tap/click targets: ≥ 44 pt/dp (mobile HIG); targets must not overlap each other.
+- Feedback on action: every user action produces a visible response before the
+  next interaction is available.
+- Empty / loading / error states: handled and communicated, not silently blank.
+- Accessibility: semantic markup / ARIA where applicable; colour contrast sufficient.
+
+Missing UX acceptance criteria in the spec is itself a **concern** — flag it.
+
 ## Finding schema
 
 Each finding:

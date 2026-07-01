@@ -141,7 +141,7 @@ Before any structural change: `python3 scripts/validate_plugin.py` and
 
 ## Operator setup (one-time)
 
-- Tag `v0.1.0` so consumers' pinned `ref` resolves.
+- Tag each release (current: `v0.2.4`) so consumers' pinned `ref` resolves.
 - Decide how the Improver/Scout loops run (see *Self-improvement* above): a
   scheduled Claude routine (`/swarm:improve`, `/swarm:scout`) on your
   subscription, or the Actions workflows with `CLAUDE_CODE_OAUTH_TOKEN`

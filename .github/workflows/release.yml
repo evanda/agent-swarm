@@ -32,10 +32,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="${{ steps.v.outputs.tag }}"
-          if git rev-parse "$tag" >/dev/null 2>&1; then
-            echo "$tag already exists — nothing to do."
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "release $tag already exists — nothing to do."
             exit 0
           fi
-          git tag -a "$tag" -m "swarm plugin $tag"
-          git push origin "$tag"
-          gh release create "$tag" --title "$tag" --generate-notes
+          # gh creates the tag at --target via the API, so the runner needs no
+          # git committer identity.
+          gh release create "$tag" --title "$tag" --target "$GITHUB_SHA" --generate-notes

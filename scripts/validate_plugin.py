@@ -76,6 +76,27 @@ if plugin is not None:
         if key not in plugin:
             err(f"plugin.json: missing '{key}'")
 
+# --- version <-> consumer-template pin sync ---------------------------------
+# The plugin is only consumable when four artifacts agree: plugin.json version,
+# the git tag, the GitHub release, and the consumer template's pinned ref. Tag +
+# release are created post-merge by .github/workflows/release.yml; the piece we
+# can enforce at PR time is that the template ref matches the version being
+# shipped, so a version bump can't merge without moving the adoption pin too.
+if plugin is not None and "version" in plugin:
+    expected_ref = f"v{plugin['version']}"
+    consumer = load_json("templates/consumer/settings.json")
+    if consumer is not None:
+        try:
+            ref = consumer["extraKnownMarketplaces"]["swarm"]["source"]["ref"]
+        except (KeyError, TypeError):
+            ref = None
+            err("templates/consumer/settings.json: missing "
+                "extraKnownMarketplaces.swarm.source.ref")
+        if ref is not None and ref != expected_ref:
+            err(f"version pin out of sync: templates/consumer/settings.json ref "
+                f"'{ref}' != plugin.json version '{expected_ref}'. Bump both in the "
+                f"same PR (the release workflow tags + publishes {expected_ref} on merge).")
+
 # --- agents -----------------------------------------------------------------
 EXPECTED_AGENTS = {
     "orchestrator", "explorer", "architect", "challenger", "implementer",

@@ -141,7 +141,10 @@ Before any structural change: `python3 scripts/validate_plugin.py` and
 
 ## Operator setup (one-time)
 
-- Tag each release (current: `v0.2.4`) so consumers' pinned `ref` resolves.
+- Releases are automatic: bump `plugin.json` `version` **and** the consumer
+  template `ref` in the same PR (CI enforces they match); on merge,
+  `release.yml` tags `vX.Y.Z` and publishes the GitHub release so consumers'
+  pinned `ref` resolves.
 - Decide how the Improver/Scout loops run (see *Self-improvement* above): a
   scheduled Claude routine (`/swarm:improve`, `/swarm:scout`) on your
   subscription, or the Actions workflows with `CLAUDE_CODE_OAUTH_TOKEN`

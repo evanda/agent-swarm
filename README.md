@@ -75,6 +75,16 @@ a pinned ref — it never copies the agents/skills, so it can't go stale, and a
 running app session needs no second clone. Adopt central improvements by bumping
 the pin.
 
+Then, in a Claude Code session **in the target repo**, activate the plugin:
+
+```
+/plugin install swarm@swarm     # choose "project" scope
+/reload-plugins
+```
+
+The repo is now swarm-ready but dormant — nothing fires until a human types
+`/swarm:*`.
+
 → **Deeper:** [credentials & access model](docs/credentials.md) ·
 [consumer footprint](templates/consumer/README.md) ·
 [install vs runtime boundary](docs/decisions/0003-install-vs-runtime-boundary.md)

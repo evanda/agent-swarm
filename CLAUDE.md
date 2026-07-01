@@ -24,8 +24,10 @@ in the [README](README.md).
 ## Conventions
 
 - **The brain changes only via reviewed PRs.** Improver/Scout propose; a human
-  merges. Bump `plugins/swarm/.claude-plugin/plugin.json` `version` on every
-  meaningful change; consumers pin to it.
+  merges. On every meaningful change run `python3 scripts/bump_version.py`
+  (`--minor`/`--major` as needed) — it bumps `plugin.json` `version` **and** the
+  consumer template `ref` together. Never hand-edit either: CI rejects a PR
+  where they drift, and merging auto-tags + publishes the release.
 - **Entry commands are explicit-only** (`disable-model-invocation: true`) and
   operational skills are `user-invocable: false` — so the swarm installs dormant
   and nothing fires until a human types `/swarm:*`.

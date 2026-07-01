@@ -24,9 +24,13 @@ own job by turning evidence (retros, traces, decision records, evals) into
 4. **Verify — run the evals.** `python3 knowledge/evals/run.py --llm`. **Confirm
    no regression** before opening the PR. If an edit regresses an eval, drop or
    fix it.
-5. **Open ONE PR.** Group related changes, link the proposals it resolves, bump
-   `plugins/swarm/.claude-plugin/plugin.json` version, label `meta`. Do **not**
-   merge it — the human merges.
+5. **Bump the version — always, via the helper.** Run
+   `python3 scripts/bump_version.py` (add `--minor`/`--major` for bigger
+   changes). It bumps `plugin.json` **and** the consumer template `ref` in
+   lockstep — CI rejects the PR if they drift, and the merge auto-tags the
+   release. Never hand-edit either version; never skip this step.
+6. **Open ONE PR.** Group related changes, link the proposals it resolves, label
+   `meta`. Do **not** merge it — the human merges.
 
 ## Metrics to track (adversarial health)
 

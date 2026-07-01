@@ -1,0 +1,41 @@
+name: release
+
+# Keeps the release side of the version-sync invariant automatic: whenever
+# plugin.json's version changes on main, tag it and cut a matching GitHub
+# release so consumers' pinned `ref` resolves. The PR-time half (template ref
+# == plugin.json version) is enforced by scripts/validate_plugin.py.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/swarm/.claude-plugin/plugin.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Resolve version
+        id: v
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('plugins/swarm/.claude-plugin/plugin.json'))['version'])")
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+      - name: Create tag + release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.v.outputs.tag }}"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "$tag already exists — nothing to do."
+            exit 0
+          fi
+          git tag -a "$tag" -m "swarm plugin $tag"
+          git push origin "$tag"
+          gh release create "$tag" --title "$tag" --generate-notes

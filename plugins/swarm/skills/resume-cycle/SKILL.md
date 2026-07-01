@@ -48,6 +48,14 @@ Where reality and the log disagree (log says dispatched, no PR exists; log silen
 but a PR is open; a PR merged that the log never recorded), **append a `note`**
 recording the correction. Never rewrite past events — the log is append-only.
 
+**Never trust an interrupted or crashed agent's artifacts at face value.** A
+worktree left by a dead background agent (API drop, process restart) can look
+complete — fresh mtimes, a plausible diff — while being partial or internally
+inconsistent. Before treating that work as done or advancing *any* gate on top
+of it, diff the worktree against the spec/critique it was answering and confirm
+every item actually landed. Log a `note` naming the crash and the worktree path
+so the checklist shows the recovery boundary, not a silent gap.
+
 ## Step 3 — Compute the frontier
 
 For each sub-issue, determine the next incomplete stage, using the **already-
@@ -74,6 +82,10 @@ Drive the lane forward from the frontier, **skipping anything already done**:
   fresh Implementer against the same sub-issue and worktree (cattle — a new
   instance picks up the claim and the on-disk work). Only `SendMessage`-resume a
   prior Implementer if that task is genuinely still alive and cheaper to continue.
+  If the prior instance died mid-task, the fresh Implementer's first job is to
+  verify the inherited worktree against the spec/critique (Step 2) before
+  continuing or redoing it — never assume a crashed instance's partial work is
+  either complete or safely discardable.
 - **Reviewer.** A returned Implementer whose Reviewer never ran needs a **fresh
   Reviewer on a different model** — the pairing and different-model rules hold on
   resume exactly as on a first pass. An agent never reviews its own PR.

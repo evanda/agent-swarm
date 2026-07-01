@@ -54,6 +54,12 @@ these events will produce an empty checklist and an unrenderable debrief.
 checklist closes the item. Record `--tokens` when known (even rough) so cost is
 visible.
 
+**Recording a crashed/interrupted agent:** when `resume-cycle` finds a dispatched
+agent that never returned (dead background task, dropped session), close the pair
+with `agent_returned --status blocked` and a `note` naming the worktree path — do
+not leave it dangling as perpetually `in_progress`. This is what makes a crash
+visible in the checklist as a distinct marker rather than a silent gap.
+
 ## The live checklist (the human's window into the run)
 
 The Orchestrator (via the Scribe) keeps a **single GitHub issue comment** current,

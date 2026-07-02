@@ -20,7 +20,15 @@ so is inventing blockers — score by confidence.
 
 **Tests**
 - Do tests cover the *changed behavior* and its edges (not just the happy path)?
-- Would they actually catch a regression? Run them.
+- Would they actually catch a regression? Run the repo's **full configured
+  verification set** — typecheck **and** test **and** lint/format (whatever
+  `package.json`/CI defines) — not just typecheck+test. A lint/format failure is
+  at least a nit; treat it as blocking if it's already on `main`.
+- For any test asserting a *specific mechanism* prevents a failure (mandatory for
+  `[SEC]`/`risk:security`): verify it's **non-vacuous** — disable or mutate the
+  mechanism and confirm the test fails. A test that passes whether or not the
+  mechanism runs is a false guard. Corollary: a design blocker resting on assumed
+  framework behavior must be source- or spike-verified, not taken from docs alone.
 
 **Risk surfaces** (escalate if mishandled)
 - `risk:auth` — access control intact, no privilege escalation, sessions sound.

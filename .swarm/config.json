@@ -1,4 +1,10 @@
 {
   "central_repo": "evanda/agent-swarm",
-  "debrief": "issue"
+  "debrief": "issue",
+  "model_tiers": {
+    "fast": "claude-haiku-4-5",
+    "standard": "claude-sonnet-5",
+    "deep": "claude-opus-4-8",
+    "adversarial": "claude-fable-5"
+  }
 }

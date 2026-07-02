@@ -25,6 +25,12 @@ decision-recording requirement.
 3. **plan** → write `specs/<issue-id>/plan.md`:
    - Approach; **key decisions with rejected alternatives + why**; affected
      components; data/contract impact; **test strategy**; rollout/rollback.
+   - **Split-authority design-smell check**: if a value is *produced* by one side
+     of a trust/authority boundary (e.g. client-predicted) and *consumed* or also
+     *mutated* by the other (e.g. server-adjudicated), don't model it as owned by
+     one side only — pin the explicit **reconciliation model** (server-absolute,
+     or client-owned with server-applied deltas/ledger) before fan-out. A field
+     both sides mutate is a flag to resolve at design time, not defer to review.
 4. **tasks** → write `specs/<issue-id>/tasks.md`:
    - One delegatable task per future Implementer. Each: independently testable,
      clear file/scope boundary so parallel tasks don't collide, explicit
@@ -36,6 +42,18 @@ decision-recording requirement.
    - **Minimize the serial spine**: explicitly identify which tasks are independent
      (fan-out safe). State the critical-path length in tasks.md as a planning
      metric; if it exceeds 3 sequential hops, challenge the decomposition.
+   - **Pin shared contracts**: when tasks fan out in parallel across a shared
+     interface (a data shape, event payload, field name produced by one task and
+     consumed by another), pin the exact shape as a named contract in tasks.md
+     that every side codes against — don't leave each task to infer it and
+     reconcile the mismatch at integration.
+   - **Cross-component integration smoke**: when the milestone spans a
+     client↔server or other multi-component boundary, add an early **integration
+     smoke task** (two real endpoints actually exchanging state) as its own task,
+     placed *before* the big fan-out — a cheap headless probe is enough. The
+     acceptance criteria must include this real end-to-end check, not only
+     per-package unit suites; components can each pass in isolation while the
+     integration between them is broken.
 5. **clarify** — list open questions that block fan-out. Resolve with the
    Orchestrator/human before proceeding.
 

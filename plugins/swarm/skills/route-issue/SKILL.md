@@ -60,3 +60,20 @@ Lane sets the dialectic depth automatically:
 | Express | 1 | none | no |
 | Standard | cap 2 | none (unless risk flag) | no |
 | Deep | cap 3 per PR | Architect↔Challenger cap 2, before fan-out | if any risk flag |
+
+## Model tier (stamp per task/role)
+
+Alongside the lane, stamp a **model tier per task/role** from the matrix in
+`.swarm/config.json` (`model_tiers`), so dispatch defaults to the right cost/
+speed/quality point instead of a flat policy:
+
+| Task class | Tier | Why |
+|---|---|---|
+| Mechanical — docs, lint/format, config-leaf edits, verbatim relocations, status/spot-checks | `fast` | near-zero judgment; fast/cheap wins |
+| Standard implement + standard review; Challenger on non-risk work | `standard` | the bulk of the lane |
+| Architect (design), hard reconciliation/integration, ambiguous debugging | `deep` | needs judgment/depth |
+| Adversarial/security — red-team pass, reviewer of the highest-risk `[SEC]` task, Challenger on security-critical dialectics, gnarliest design calls | `adversarial` | a miss here is a cheat hole |
+
+Map tier → model in `.swarm/config.json`; when unset, fall back to the prior flat
+policy. The **cross-model-review invariant** (reviewer's model ≠ implementer's
+model) is a constraint on top of tier selection, not replaced by it.

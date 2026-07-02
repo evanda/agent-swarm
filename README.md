@@ -39,6 +39,7 @@ table and the `risk:*` flags that force Deep.
 | `/swarm:status [issue#]` | what each agent is doing now, gates, tokens, links |
 | `/swarm:stop [issue#]` | gracefully halt a cycle (Esc interrupts agents; this cleans up) |
 | `/swarm:retro [scope]` | retrospective → learning-proposals |
+| `/swarm:update [ref]` | bump this repo's pinned ref to adopt the latest (or a given) central release |
 | `/swarm:help` | full in-tool reference |
 
 You can also run work async: file/assign an Issue with the `swarm:async` label
@@ -117,7 +118,8 @@ It writes a tiny footprint into the target (merging into any existing `CLAUDE.md
 token setup and verifies it. The target only **references** the central plugin at
 a pinned ref — it never copies the agents/skills, so it can't go stale, and a
 running app session needs no second clone. Adopt central improvements by bumping
-the pin.
+the pin — from a session **in the target repo**, `/swarm:update` does this for
+you (no second clone needed); it never touches anything but that one `ref`.
 
 Then, in a Claude Code session **in the target repo**, activate the plugin:
 

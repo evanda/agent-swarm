@@ -15,5 +15,6 @@ The dev swarm is **available but dormant** here. Summon it explicitly:
 - `/swarm:start <issue#-or-description>` — triage, route, run the lane.
 - `/swarm:express <description>` — force the Express lane for a known-trivial fix.
 - `/swarm:retro` — retrospective on recent work.
+- `/swarm:update [ref]` — adopt the latest (or a given) central swarm release.
 
 Repo-specific rules live in `constitution.delta.md`. No `/swarm:` typed = no swarm.

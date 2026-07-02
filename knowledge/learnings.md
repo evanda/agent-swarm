@@ -20,6 +20,20 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — A degraded runtime must be a visible signal, not a silent fallback
+- **Context:** Issue #27 — a process restart mid-Deep-lane-run dropped the swarm plugin/MCP connection; branded `swarm:*` agent types and the GitHub MCP became unavailable, and the run silently continued on `general-purpose` agents + the `gh` CLI, losing the Scribe/Integrator roles for the rest of the run. The downgrade was discovered via a tool-not-found error, not signalled.
+- **Failure class:** When a capability the run depends on silently disappears (here: harness-level plugin/MCP reconnect after restart, outside this repo's control), continuing on a degraded fallback without surfacing that fact turns an infrastructure hiccup into an undetected scope/quality gap.
+- **Lesson:** `resume-cycle` now runs a Step 0 check — confirm branded agent types and required MCPs resolve before rehydrating cycle state; if either is missing, log an explicit `note` ("swarm context degraded") and tell the human, rather than silently falling back. Auto-reconnect itself is a harness capability this repo doesn't own and can't fix directly; persisting/reattaching in-flight background agents across a restart remains open (overlaps #16).
+- **Scope:** shared.
+- **Status:** promoted-to(resume-cycle skill).
+
+## 2026-07-02 — Worktree provisioning needs a documented per-project recipe, not per-agent rediscovery
+- **Context:** Issue #30 (framework-level, split from a bub-specific companion) — Implementers in fresh `git worktree`s repeatedly hit missing-dependency walls (no `node_modules`, no generated assets, wrong toolchain version) and had to symlink the main checkout by hand each time, weakening the "verify in your own worktree" discipline.
+- **Failure class:** A generic framework gap (worktrees aren't provisioned) has a project-specific fix (what to symlink, which toolchain) — solving it purely at the framework layer is impossible without the concrete recipe, and solving it purely per-agent means every Implementer rediscovers the same fix.
+- **Lesson:** Added a **Worktree provisioning** section to the consumer `constitution.delta.md` template — a place to record the concrete recipe once (symlink targets, pinned toolchain, one-time build steps). The Implementer now checks it before running tests/build, and if empty, works out the fix and records it there via the Scribe so later worktrees don't repeat the discovery.
+- **Scope:** shared (the contract/template) + project (the concrete recipe each project fills in) — a split case per `promote-learning`.
+- **Status:** promoted-to(implementer.md, templates/consumer/constitution.delta.md).
+
 ## 2026-07-02 — WHERE-routing must gate every issue filing, not just learning-proposals
 - **Context:** Issue #31 — the Scribe's follow-up-issue-filing responsibility defaulted to the active working repo with no WHERE check, while the sibling learning-proposal responsibility already used the `promote-learning` litmus. During the bub #187 run this put four framework-level `swarm:infra` issues onto the project repo instead of the shared swarm repo; they had to be transferred by hand (became agent-swarm#26–#30), and a combined issue had to be split into a portable contract + a project-specific recipe after the fact.
 - **Failure class:** A routing discipline defined for one output type (learning-proposals) doesn't automatically apply to a sibling output type (follow-up issues) that shares the same underlying WHERE question — each output path needs the gate stated explicitly, not inferred by analogy.

@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — "Reattach a crashed agent" means a fresh cattle instance inheriting committed state, not a process resume
+- **Context:** Issue #16/#27 — a process restart killed a background Implementer mid-task, leaving ~90%-done work uncommitted in its worktree, indistinguishable from abandoned. The proposed fixes ("checkpoint/commit WIP", "resume-from-journal/reattach") implicitly asked for literal process resume, which the swarm's cattle-not-pets agent model doesn't support and the harness doesn't expose.
+- **Failure class:** A recovery ask framed around resuming the dead thing (the process) obscures the actually-available recovery path (a fresh instance inheriting the dead one's on-disk state) — and without a committed checkpoint, "on-disk state" is uncommitted limbo that can't be trusted or cleanly handed off.
+- **Lesson:** Implementer now commits WIP checkpoints (`wip: <state>`) after each coherent chunk of multi-file work, squashed before the final PR — a crash then leaves a committed recovery boundary. `resume-cycle` now states explicitly that "reattach" *is* fresh-Implementer-inherits-worktree (already the cattle model), and that inherited uncommitted changes get the same crashed-status suspicion as a confirmed crash until verified against spec/critique.
+- **Scope:** shared.
+- **Status:** promoted-to(implementer.md, resume-cycle skill).
+
 ## 2026-07-02 — Deep-lane ceremony should be right-sized per task and pipelined, not uniform and serial
 - **Context:** Issue #20 — a correct 12-task Deep-lane run (~2.11M tokens, 34 agent-runs) took far too long: every task, even a 1–3 line UX tweak on already-reviewed code, paid the full lifecycle (worktree → implement → CI `--watch` → different-model review → merge → sync), and the critical path was mostly-serial with genuine parallelism the exception.
 - **Failure class:** Two compounding causes — (1) the cycle-level lane was treated as uniform per-task ceremony instead of a design/gate-level setting, so trivial follow-ups paid full Deep review depth; (2) the Orchestrator barriered on each task's review/CI before dispatching the next independent task instead of pipelining, turning parallelizable work into a serial chain.

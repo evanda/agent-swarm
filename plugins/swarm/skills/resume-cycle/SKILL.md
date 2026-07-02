@@ -115,6 +115,13 @@ Drive the lane forward from the frontier, **skipping anything already done**:
   fresh Implementer against the same sub-issue and worktree (cattle — a new
   instance picks up the claim and the on-disk work). Only `SendMessage`-resume a
   prior Implementer if that task is genuinely still alive and cheaper to continue.
+  **This is the practical form of "reattach" for a crashed background agent** —
+  the swarm doesn't resume a dead process; a fresh Implementer inherits its
+  worktree instead. This only recovers cleanly if the prior instance
+  checkpointed WIP commits (see `implementer.md`) — inherited *uncommitted*
+  changes are exactly the ambiguous "in progress vs. abandoned" state Step 0/2's
+  verification exists to catch; treat them with the same suspicion as a
+  `crashed` status until confirmed against the spec/critique.
 - **Reviewer.** A returned Implementer whose Reviewer never ran needs a **fresh
   Reviewer on a different model** — the pairing and different-model rules hold on
   resume exactly as on a first pass. An agent never reviews its own PR.

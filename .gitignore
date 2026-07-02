@@ -1,5 +1,6 @@
 # Runtime instrumentation (state lives in Git, but the raw run log is local)
 .swarm/run-log.jsonl
+.swarm/version-check-cache.json
 
 # Python
 __pycache__/

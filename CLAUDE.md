@@ -9,8 +9,9 @@ in the [README](README.md).
 ## Map
 
 - `plugins/swarm/` — the plugin: `agents/` (10 roles), `skills/` (methodology),
-  `commands/` (entry points), `hooks/` (the one global guard), `.mcp.json`,
-  `scripts/` (runtime tools shipped to consumers, e.g. `swarm_log.py`).
+  `commands/` (entry points), `hooks/` (the global guard, `PreToolUse`; plus an
+  advisory version-check nudge on `/swarm:*` prompts, `UserPromptSubmit`),
+  `.mcp.json`, `scripts/` (runtime tools shipped to consumers, e.g. `swarm_log.py`).
 - `knowledge/` — `constitution.md` (always-on rules), `learnings.md`,
   `dependencies.md` (divergence ledger), `scout-sources.md`, `evals/`.
 - `.github/workflows/` — `validate-plugin.yml` (CI), `improver.yml` (nightly

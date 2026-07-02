@@ -61,7 +61,9 @@ subagents are for.
    its spec/critique before advancing any gate — partial edits look complete (fresh
    mtimes, no commit). Check: intended files changed and complete? Worktree
    committed? PR event in run-log? Treat an unverified crash as "not done" until
-   confirmed; re-dispatch rather than advance on unverified state.
+   confirmed; re-dispatch rather than advance on unverified state. Once confirmed,
+   log its `agent_returned` with `--status crashed` (not `done`/`blocked`) so the
+   run-log never records an interrupted agent as a clean finish.
 5. **Close the loop.** Ask the Scribe to record decisions, file follow-up issues,
    and emit learning-proposals.
 

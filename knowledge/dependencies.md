@@ -26,8 +26,8 @@ reviewed on every relevant PR.
 
 - capability: spec-plan-tasks
   posture: adapt
-  upstream: github/spec-kit@v0.12.1
-  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). v0.12.0 made agent-context extension a full opt-in (previously default-on) and tightened workflow validation; v0.12.1 is a bug-fix patch. Our wrapper stays narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates — the revisit_if trigger (native risk-aware gating) was not tripped by either release."
+  upstream: github/spec-kit@v0.12.3
+  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). v0.12.2 retired the Windsurf/iflow integrations and bounded fan-out max_concurrency; v0.12.3 is a maintenance/integration-hygiene patch (Copilot skills rollout warning, Zed added/Roo Code retired from discovery catalog, max_iterations validation fix, prerelease version-compat checks). Our wrapper stays narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates — the revisit_if trigger (native risk-aware gating) was not tripped by any of these releases."
   revisit_if: "Spec Kit ships native *risk-aware* gating that maps to our auth/data/money/destructive rubric → drop our lane-mapping layer."
 
 - capability: feature-recon (Explorer)

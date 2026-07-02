@@ -44,8 +44,8 @@ EVENTS = {
     "cycle_completed",   # the cycle ended (success or stopped)
 }
 
-ICON = {"done": "x", "in_progress": " ", "blocked": " ", "pending": " "}
-MARK = {"in_progress": " ⏳", "blocked": " ⛔", "pending": "", "done": ""}
+ICON = {"done": "x", "in_progress": " ", "blocked": " ", "pending": " ", "crashed": "!"}
+MARK = {"in_progress": " ⏳", "blocked": " ⛔", "pending": "", "done": "", "crashed": " 💥"}
 
 # The role spine (§2) — used to show which agents are idle in the status board.
 ROLES = ["orchestrator", "explorer", "architect", "challenger", "implementer",
@@ -159,6 +159,7 @@ def cmd_status(args):
     done = first(events, "cycle_completed")
     items = pair_work_items(events)
     active = [it for it in items if it["status"] in ("in_progress", "blocked")]
+    crashed = [it for it in items if it["status"] == "crashed"]
     active_agents = {it["agent"] for it in active}
     open_gates = [e for e in events if e["event"] == "gate"]
     open_escs = [e for e in events if e["event"] == "escalation"]
@@ -167,7 +168,9 @@ def cmd_status(args):
     lane = (routed or {}).get("lane", "?")
     risk = (routed or {}).get("detail", "")
     head = f"🐝 Swarm cycle {args.cycle} — {lane}" + (f" ({risk})" if risk else "")
-    state = "✅ completed" if done else ("⛔ blocked" if any(i['status']=='blocked' for i in active) else "running")
+    state = ("✅ completed" if done else
+             "💥 crashed" if crashed else
+             "⛔ blocked" if any(i['status']=='blocked' for i in active) else "running")
     print(head)
     print(f"State: {state} · last activity {last_ev['ts']} · ~{total_tokens(events)/1000:.1f}k tokens")
     print("")
@@ -180,6 +183,10 @@ def cmd_status(args):
             print(f"  {flag} {it['agent']:<12} {it['label']}{rd}{tok}")
     else:
         print("  (no agent currently active)")
+    if crashed:
+        print("")
+        for it in crashed:
+            print(f"  💥 {it['agent']:<12} {it['label']} — crashed, needs re-verification before resume")
     idle = [r for r in ROLES if r not in active_agents]
     if idle and not done:
         print(f"  · idle: {', '.join(idle)}")
@@ -354,7 +361,7 @@ def main():
     lg.add_argument("--lane")
     lg.add_argument("--detail")
     lg.add_argument("--task")
-    lg.add_argument("--status", choices=["pending", "in_progress", "done", "blocked"])
+    lg.add_argument("--status", choices=["pending", "in_progress", "done", "blocked", "crashed"])
     lg.add_argument("--round", type=int)
     lg.add_argument("--tokens", type=int)
     lg.add_argument("--data", help="extra JSON object")

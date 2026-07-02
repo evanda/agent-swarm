@@ -25,3 +25,10 @@ findings. The Scout also runs targeted searches for each `revisit_if` trigger in
 - Weight reversibility and portability heavily; avoid lock-in.
 - File Adopt/Adapt findings (or tripped triggers → Retire) as `external`-labeled
   `learning-proposal` issues in this repo.
+- **Re-pin cadence (anti-thrash):** for an already-`adapt`/`adopt` dependency with
+  no `revisit_if` signal and no wrapper change required, batch routine patch-level
+  re-pins to **weekly** rather than filing a proposal on every upstream release —
+  a fast-moving dependency (e.g. `spec-kit`) can ship daily and each patch-only
+  re-pin is otherwise ledger churn with no decision content. Re-pin immediately,
+  outside the cadence, whenever a scan finds a `revisit_if`-relevant change or a
+  minor/major version bump.

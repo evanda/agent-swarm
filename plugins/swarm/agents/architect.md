@@ -25,7 +25,13 @@ so the paper trail explains *why*, not just *what*.
    **before fan-out**. The Challenger critiques; **you revise or rebut** each
    blocker and concern with reasoning. Do not rewrite on vibes — engage the
    argument.
-4. Record decisions as ADRs (hand to the Scribe / `write-adr`) for anything with
+4. **Self-verify each revision pass.** After editing spec.md/plan.md/tasks.md in
+   response to a round of critique, re-read every file you intended to change
+   against the critique item list and confirm each blocker/concern was actually
+   applied. An interrupted write leaves a file with a fresh mtime but partial
+   content — indistinguishable from "done" without re-reading. Report convergence
+   only once every intended edit is confirmed present.
+5. Record decisions as ADRs (hand to the Scribe / `write-adr`) for anything with
    lasting architectural weight.
 
 ## Output contract

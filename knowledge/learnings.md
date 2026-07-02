@@ -20,6 +20,20 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — Self-verify after a multi-file edit is a per-role gap, not a one-time fix
+- **Context:** Issue #28 — a `swarm:architect` round-2 dialectic revision hit a mid-write API disconnect; two of three critique fixes never landed, but all three files had fresh mtimes and looked complete. The 2026-06-30 cycle (PR #22) had already added a self-verify re-read step to `implementer.md` for the same class of failure, but the Architect — a second role that edits multiple artifacts per pass — still had no equivalent instruction, and it was the Architect that failed here.
+- **Failure class:** A self-verification instruction added to one generator role does not generalize to other roles that share the same failure mode (multi-file edit, no post-write re-read). Each role needs the instruction stated explicitly; agents don't infer it across role boundaries.
+- **Lesson:** When a self-verify / re-read-after-write step is added for one role, audit every other role that performs multi-file edits (Architect, Implementer, and any future generator) and add the same step there too, in the same cycle. Added to `architect.md`'s dialectic step (re-read spec/plan/tasks against the critique list before reporting convergence). Also added an explicit `crashed` run-log status (`run-log` skill + `swarm_log.py`) so an orchestrator that confirms an interruption can log it as an unambiguous terminal state rather than `done`/`blocked`.
+- **Scope:** shared.
+- **Status:** recurring (first instance: implementer.md, 2026-06-30 cycle; second instance: architect.md, this cycle — same class, different role).
+
+## 2026-07-02 — Re-pin thrash: patch-level dependency bumps don't need their own proposal
+- **Context:** Four `spec-plan-tasks` re-pin proposals in 6 days (#4 → v0.11.9, #21 → v0.12.1, #37 → v0.12.2, #39 → v0.12.3), none of which tripped the `revisit_if` or changed the wrapper — each was pure ledger churn on a fast-moving upstream (`spec-kit` ships near-daily).
+- **Failure class:** The anti-thrash discipline in `scout.md`/`scout-scan` was written for *novel tool* thrash ("chase novelty") but didn't cover *re-pin* thrash on an already-adopted dependency — a different mechanism producing the same symptom (issue/PR overhead disproportionate to decision content).
+- **Lesson:** Batch routine patch-level re-pins (no `revisit_if` signal, no wrapper change) to a weekly cadence; re-pin immediately only when a scan finds a `revisit_if`-relevant change or a minor/major bump. Hardened directly into `knowledge/scout-sources.md`'s scan discipline this cycle, given four recurrences before the fix.
+- **Scope:** shared.
+- **Status:** promoted-to(knowledge/scout-sources.md).
+
 ## 2026-06-27 — Pin upstream by release, never `@latest`
 - **Context:** Scout finding #4 — `spec-plan-tasks` ledger row pinned `github/spec-kit@latest`. Spec Kit shipped 55+ releases and reached v0.11.9, tripping the `revisit_if` for native gates.
 - **Failure class:** `adopt`/`adapt` rows pinned to a moving ref drift silently — behavior changes before it is vetted, defeating the divergence ledger.

@@ -17,6 +17,9 @@ Usage:
   swarm_log.py checklist --cycle 42        # render the live checklist (markdown)
   swarm_log.py debrief   --cycle 42        # render the full debrief (markdown)
   swarm_log.py cycles                      # list cycles present in the log
+  swarm_log.py frontier  --cycle 42 [--ground-truth '{...}'] [--json]
+      # deterministic per-task next-stage (done/resume/dispatch/crashed) from
+      # the log, reconciled against ground truth if given — resume-cycle Step 3
 
 The log file defaults to ./.swarm/run-log.jsonl (repo root); override with --file.
 """
@@ -132,6 +135,110 @@ def pair_work_items(events):
 
 def total_tokens(events):
     return sum(int(ev.get("tokens", 0) or 0) for ev in events)
+
+
+# --- frontier (deterministic resume reconcile) -------------------------------
+ROLE_STAGE = {"implementer": "implement", "reviewer": "review", "integrator": "merge"}
+
+
+def compute_frontier(events, ground_truth=None):
+    """Compute each task's next-incomplete-stage from run-log events, then
+    reconcile against ground truth (reality wins over the log, per the
+    resume-cycle skill). Deterministic — no model judgment.
+
+    `ground_truth`, if given, is a dict:
+      {"open_prs": [...], "merged_prs": [...],
+       "sub_issues": {task_id: "open|closed[, label: ..., assignee: ...]"},
+       "worktrees": {task_id: "present, ..."}}
+
+    Returns (frontier, notes):
+      frontier: {task_id: "done" | "resume" | "dispatch" | "crashed"}
+        - done     — merged (or ground truth shows closed); nothing to do.
+        - resume   — implement and/or review started but not merged; continue
+                     from here, don't restart from scratch.
+        - dispatch — no work logged yet for this task.
+        - crashed  — an `agent_returned --status crashed` was recorded; must be
+                     re-verified against spec/critique before advancing (never
+                     silently treated as done or auto-resumed).
+      notes: human-readable corrections made from reconciling against reality.
+    """
+    tasks = {}
+
+    def rec(task_id):
+        return tasks.setdefault(task_id, {"implement": "pending", "review": "pending",
+                                           "merge": "pending", "crashed": False})
+
+    for ev in events:
+        task_id = ev.get("task")
+        if not task_id:
+            continue
+        r = rec(task_id)
+        stage = ROLE_STAGE.get(ev.get("agent"), "implement")
+        if ev["event"] == "agent_dispatched" and r[stage] == "pending":
+            r[stage] = "in_progress"
+        elif ev["event"] == "agent_returned":
+            status = ev.get("status", "done")
+            r[stage] = status
+            if status == "crashed":
+                r["crashed"] = True
+        elif ev["event"] == "pr_merged":
+            r["merge"] = "done"
+
+    notes = []
+    if ground_truth:
+        sub_issues = ground_truth.get("sub_issues", {})
+        worktrees = ground_truth.get("worktrees", {})
+        # Ground truth can name a sub-issue the log never mentions at all (never
+        # dispatched, or dispatched on a machine whose log we don't have).
+        for task_id in sub_issues:
+            if task_id not in tasks:
+                rec(task_id)
+        for task_id, r in tasks.items():
+            si = sub_issues.get(task_id, "")
+            if "closed" in si and r["merge"] != "done":
+                r["implement"] = r["review"] = r["merge"] = "done"
+                notes.append(f"{task_id}: log lagged reality — ground truth shows the "
+                             f"sub-issue closed/merged; corrected to done")
+            elif task_id in worktrees and r["implement"] == "pending":
+                r["implement"] = "in_progress"
+                notes.append(f"{task_id}: log shows no dispatch but a worktree with "
+                             f"on-disk changes exists; treated as in-progress, not fresh")
+
+    frontier = {}
+    for task_id, r in tasks.items():
+        if r["crashed"]:
+            frontier[task_id] = "crashed"
+        elif r["merge"] == "done":
+            frontier[task_id] = "done"
+        elif r["implement"] == "pending" and r["review"] == "pending":
+            frontier[task_id] = "dispatch"
+        else:
+            frontier[task_id] = "resume"
+    return frontier, notes
+
+
+def cmd_frontier(args):
+    events = read_events(args.file, args.cycle)
+    if not events:
+        print(f"No events for cycle {args.cycle}.")
+        return
+    ground_truth = None
+    if args.ground_truth:
+        try:
+            ground_truth = json.loads(args.ground_truth)
+        except json.JSONDecodeError as e:
+            sys.exit(f"ERROR: --ground-truth is not valid JSON: {e}")
+    frontier, notes = compute_frontier(events, ground_truth)
+    if args.json:
+        print(json.dumps({"frontier": frontier, "notes": notes}, indent=2))
+        return
+    if not frontier:
+        print("No task-scoped events found (events need --task to be tracked here).")
+        return
+    for task_id, action in frontier.items():
+        print(f"{task_id}: {action}")
+    for n in notes:
+        print(f"note: {n}")
 
 
 def first(events, name):
@@ -381,6 +488,12 @@ def main():
 
     cy = sub.add_parser("cycles", help="list cycles present in the log")
     cy.set_defaults(func=cmd_cycles)
+
+    fr = sub.add_parser("frontier", help="deterministic per-task next-stage (resume-cycle Step 3)")
+    fr.add_argument("--cycle", required=True)
+    fr.add_argument("--ground-truth", help="JSON: open_prs/merged_prs/sub_issues/worktrees, reconciled over the log")
+    fr.add_argument("--json", action="store_true", help="machine-readable output")
+    fr.set_defaults(func=cmd_frontier)
 
     args = ap.parse_args()
     args.func(args)

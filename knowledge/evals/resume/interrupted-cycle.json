@@ -17,6 +17,16 @@
       ],
       "last_event": "agent_dispatched(reviewer, t2)"
     },
+    "events": [
+      {"event": "cycle_started", "cycle": "99"},
+      {"event": "lane_routed", "cycle": "99", "lane": "lane:deep"},
+      {"event": "agent_dispatched", "cycle": "99", "agent": "implementer", "task": "t1", "detail": "add /health/ready endpoint"},
+      {"event": "pr_opened", "cycle": "99", "task": "t1", "detail": "PR #50"},
+      {"event": "pr_merged", "cycle": "99", "task": "t1", "detail": "PR #50"},
+      {"event": "agent_returned", "cycle": "99", "agent": "implementer", "task": "t1", "status": "done"},
+      {"event": "agent_dispatched", "cycle": "99", "agent": "implementer", "task": "t2", "detail": "update schema migration"},
+      {"event": "agent_dispatched", "cycle": "99", "agent": "reviewer", "task": "t2", "detail": "update schema migration"}
+    ],
     "ground_truth": {
       "open_prs": [],
       "merged_prs": ["PR #50 — t1: add /health/ready endpoint"],
@@ -31,6 +41,7 @@
   },
   "expect": {
     "frontier": "t2 must be resumed (not re-dispatched from scratch); t1 must NOT be redone",
+    "frontier_tasks": {"t1": "done", "t2": "resume"},
     "rationale_contains": ["t1", "merged", "t2", "in-progress", "resume"]
   }
 }

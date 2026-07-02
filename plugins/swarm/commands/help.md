@@ -56,6 +56,11 @@ you summon it — a plain session with no `/swarm:` typed behaves 100% normally.
   agent did, decisions, PRs, token cost, timeline) to the issue (and optionally
   `docs/debriefs/<issue#>.md`).
 
+### Stay current
+- **`/swarm:update [ref]`** — bump this repo's pinned marketplace ref to the
+  central repo's latest release (or a given ref). Central improvements only
+  reach this repo by bumping the pin — nothing else needs to change.
+
 ### Where things live
 - `specs/<issue#>/` — Deep-lane spec/plan/tasks · `docs/decisions/` — ADRs ·
   `docs/debriefs/` — per-cycle reports (if committed) · `.swarm/config.json` —

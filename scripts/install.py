@@ -46,6 +46,7 @@ The dev swarm is **available but dormant** in this repo. Summon it explicitly:
 - `/swarm:start <issue#-or-description>` — triage, route, and run the lane.
 - `/swarm:express <description>` — force the Express lane for a known-trivial fix.
 - `/swarm:retro` — retrospective on recent work.
+- `/swarm:update [ref]` — adopt the latest (or a given) central swarm release.
 
 Repo-specific overrides live in `constitution.delta.md`. Nothing swarm-related
 fires until you type a `/swarm:*` command — *no `/swarm:` typed = no swarm.*"""

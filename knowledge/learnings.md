@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — A routing label must never double as an unattended-work trigger
+- **Context:** Issue #9 (downstream repo) — an interactive `/swarm:start` run stamped `lane:standard` on an issue as part of routing; an async scheduled job watching for `lane:*` picked up the same label as its trigger and independently implemented the issue, committing straight to the shared `claude-async` branch with no PR and no review. Two divergent implementations collided; recovery required a manual `git revert`.
+- **Failure class:** A label meant for one purpose (routing/telemetry, applied mid-run) was overloaded as a second purpose (async trigger), so an unrelated action (stamping the routing label) silently launched a second, unattended, unreviewed build of the same issue. Compounded by the async path skipping the review gate every other swarm path enforces.
+- **Lesson:** Decouple trigger from routing label — `lane:*`/`triage` never themselves launch a run; introduce an explicit opt-in `swarm:async` label as the only async trigger. Any async job-picker must claim-before-work (check for a live claim, skip if present, post its own claim comment) symmetrically with interactive runs, and must land its result through the identical Implementer→Reviewer→merge-queue path — never a direct commit to a shared/integration branch. Hardened into `constitution.md` (new principle 10 + label taxonomy), `orchestrator.md`, `start.md`, `help.md`, and a documented async job-picker contract + routine prompt in the README.
+- **Scope:** shared.
+- **Status:** promoted-to(constitution.md, orchestrator.md, start.md, help.md, README.md).
+
 ## 2026-07-02 — Model choice should route by task class, not stay flat per role
 - **Context:** Issue #47 (spacewars M2/M3) — a flat Opus-implement/Sonnet-review policy ran verbatim relocations and doc/lint fixes at the same tier as `risk:security` pickup-adjudication work, while the adversarial passes that caught the real bugs got no upgrade.
 - **Failure class:** Model tier left implicit rather than routed means cheap mechanical work overpays (slow + costly) and the hardest adversarial/design work is under-resourced.

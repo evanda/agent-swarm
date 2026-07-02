@@ -41,8 +41,10 @@ table and the `risk:*` flags that force Deep.
 | `/swarm:retro [scope]` | retrospective → learning-proposals |
 | `/swarm:help` | full in-tool reference |
 
-You can also run work async: file/assign an Issue with a `lane:*` (or `triage`)
-label and the scheduled job picks it up — no session needed.
+You can also run work async: file/assign an Issue with the `swarm:async` label
+and the scheduled job picks it up — no session needed. `lane:*`/`triage` are
+routing/telemetry only and never themselves launch a run; see [async job-picker
+contract](#async-job-picker-contract) below for what the scheduled job must do.
 
 ## Progress & debriefs
 
@@ -58,6 +60,45 @@ is instrumented:
 
 Both render from the same event log so they can't drift. Details: the `run-log`
 and `debrief` skills.
+
+## Async job-picker contract
+
+The scheduled job that watches for `swarm:async` is external to this repo (a
+Claude Code routine or Action you configure per-project) but must follow the
+same safety properties as an interactive run — it is not a shortcut around
+review:
+
+1. **Explicit opt-in trigger only.** Watch for the `swarm:async` label, never
+   bare `lane:*`/`triage` — those are routing/telemetry, stamped by an
+   interactive run mid-flow, and must not silently launch a second, parallel
+   build of the same issue.
+2. **Claim before starting, skip if already claimed.** Check the issue for an
+   existing `<!-- swarm:claim -->` comment or assignee before doing any work; if
+   one is present from a different run, bail without touching the issue. If
+   clear, post its own claim comment
+   (`🐝 Swarm Orchestrator — async run started <!-- swarm:claim mode=async -->`)
+   before proceeding.
+3. **Never commit directly to a shared/integration branch.** Land the result
+   through the identical Implementer→Reviewer→merge-queue path every other
+   swarm path uses — a feature branch, an independent reviewer on a different
+   model, then the merge queue. No exceptions for "it's just a scheduled job."
+
+Minimal routine prompt for the scheduled session:
+
+```
+You are running the async swarm picker in a checkout of this project. For each
+open issue labeled `swarm:async`:
+
+1. Check for an existing swarm claim comment or assignee. If one exists from a
+   different run, skip this issue entirely.
+2. Post a claim comment, then act as the Orchestrator (see
+   plugins/swarm/agents/orchestrator.md) — triage, route, and run the lane.
+3. Never commit directly to a shared/integration branch. Always open a PR
+   reviewed by an independent agent on a different model, per the normal
+   Implementer -> Reviewer -> merge-queue path.
+
+Report a one-paragraph summary per issue processed (or skipped, and why).
+```
 
 ## Bootstrapping a project
 

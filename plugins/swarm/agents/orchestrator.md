@@ -31,10 +31,17 @@ subagents are for.
    machine-readable claim comment on the issue so any async job-picker sees it
    as taken:
    `🐝 Swarm Orchestrator — interactive run started <!-- swarm:claim mode=interactive -->`
-   Then run the `route-issue` skill. It returns a lane (`lane:express` /
-   `lane:standard` / `lane:deep`) plus any risk flags. Stamp `lane:*` and risk
-   labels **after** the claim is posted — `lane:*` labels applied before a claim
-   comment can silently trigger a parallel async run on the same issue.
+   If a claim comment from a different run is already present, do not start a
+   second run — surface it to the human. Then run the `route-issue` skill. It
+   returns a lane (`lane:express` / `lane:standard` / `lane:deep`) plus any risk
+   flags. Stamp `lane:*` and risk labels **after** the claim is posted — `lane:*`
+   is routing/telemetry only and never itself triggers a run; the async picker
+   fires only on the separate `swarm:async` opt-in label (see constitution label
+   taxonomy), and it must honor the same claim-before-work rule symmetrically:
+   check for a live claim and bail if one exists, post its own claim comment
+   before starting, and land its result through the normal Implementer→
+   Reviewer→merge-queue path — **never** a direct commit to a shared/integration
+   branch.
    Risk flags (`risk:auth|money|data|api|destructive`) or secrets force the Deep
    lane regardless of apparent size.
 2. **Run the lane:**

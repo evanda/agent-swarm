@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — "Real-time observability" doesn't require a web app when the durable record is already a flat event log
+- **Context:** Issue #29 — the ask was ambient, no-poll visibility into an in-flight run (one lane per role, live status) instead of repeatedly re-running `/swarm:status`. Framed as "swimlane visualizer," it read like a UI build (Canvas/SVG widget, a server, live wiring) — out of scope for a scaffolding-doc edit and deferred by two prior Improver cycles for that reason.
+- **Failure class:** The ask's *name* implied more infrastructure than the ask's *substance* needed — every event the visualizer would render already lives in a flat, already-instrumented local file (`.swarm/run-log.jsonl`); the gap was a redraw loop, not a new architecture.
+- **Lesson:** Implemented the ambient view as a terminal swimlane: `swarm_log.py watch --cycle N` polls the log and redraws one row per role (icon + current item + status), exiting at `cycle_completed`; `--once` gives a static render for scripting. No new dependency, no server — a human runs it in a side terminal instead of polling `/swarm:status`. `render_swimlane` is a pure function of the event list (same pattern as `checklist`/`debrief`), directly testable.
+- **Scope:** shared.
+- **Status:** promoted-to(swarm_log.py, run-log skill, help.md, status.md, README.md). A richer in-Claude-Code widget (if ever wanted) can build on the same `render_swimlane`/event data without redoing the instrumentation question.
+
 ## 2026-07-02 — "Reattach a crashed agent" means a fresh cattle instance inheriting committed state, not a process resume
 - **Context:** Issue #16/#27 — a process restart killed a background Implementer mid-task, leaving ~90%-done work uncommitted in its worktree, indistinguishable from abandoned. The proposed fixes ("checkpoint/commit WIP", "resume-from-journal/reattach") implicitly asked for literal process resume, which the swarm's cattle-not-pets agent model doesn't support and the harness doesn't expose.
 - **Failure class:** A recovery ask framed around resuming the dead thing (the process) obscures the actually-available recovery path (a fresh instance inheriting the dead one's on-disk state) — and without a committed checkpoint, "on-disk state" is uncommitted limbo that can't be trusted or cleanly handed off.

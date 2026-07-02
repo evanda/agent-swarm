@@ -53,6 +53,9 @@ is instrumented:
 
 - **Live checklist** — a single auto-updating comment on the issue, refreshed at
   each step; `/swarm:status` renders it on demand.
+- **Ambient live view** — `swarm_log.py watch --cycle <issue#>` in a side
+  terminal: a self-refreshing swimlane (one row per role) so you don't have to
+  keep re-running `/swarm:status`.
 - **Debrief** — at cycle end the Scribe posts a comprehensive report (what each
   agent did, decisions, PRs, **token cost**, timeline) to the issue, and
   optionally commits it to `docs/debriefs/<issue#>.md` (`.swarm/config.json`

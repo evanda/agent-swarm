@@ -35,6 +35,10 @@ you summon it — a plain session with no `/swarm:` typed behaves 100% normally.
 ### Watch it
 - **`/swarm:status [issue#]`** — what each agent is doing right now, idle roles,
   gates, tokens burned, and links to the issue / live checklist / run log.
+- **Ambient live view (no polling):** run
+  `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" watch --cycle <issue#>`
+  in a side terminal — a self-refreshing swimlane (one row per role) instead of
+  re-running `/swarm:status` by hand.
 - **Live checklist:** a single auto-updating comment on the issue (the
   `<!-- swarm:progress -->` comment), refreshed at every step.
 - **Run log:** `.swarm/run-log.jsonl` in this repo (raw event stream).

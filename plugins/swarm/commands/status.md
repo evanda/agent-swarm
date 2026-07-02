@@ -30,3 +30,6 @@ on what, gates/escalations, tokens burned, and the links to dig in.
    `/swarm:start <issue#>` to resume it from the frontier.
 
 Keep it to a tight, scannable summary — this is the "glance and know" command.
+For an ambient view that doesn't require re-invoking this command, mention
+`swarm_log.py watch --cycle <issue#>` (a self-refreshing swimlane in a side
+terminal) as the alternative to polling.

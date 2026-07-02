@@ -77,6 +77,21 @@ refreshed at every boundary:
 This is the async-durable surface (a new user watching the issue sees live state);
 Claude Code is the sync surface where the Orchestrator narrates in parallel.
 
+## Ambient live view (a third surface, local + real-time)
+
+For a human sitting at a terminal during the run, repeatedly re-running
+`swarm_log.py status` is unnecessary — a side terminal can tail the log instead:
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" watch --cycle <issue#>
+```
+
+Redraws a **swimlane** (one row per role, its current work item and status) on
+a poll interval, exiting automatically at `cycle_completed`. Pass `--once` for a
+single static render (e.g. scripting) instead of the refresh loop. This is a
+local, read-only view of the same events — it changes nothing about how or when
+agents log; it's purely an additional way to look at the log.
+
 ## Rules
 
 - Append-only: never rewrite past events; correct with a `note`.

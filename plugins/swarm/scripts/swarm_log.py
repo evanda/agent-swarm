@@ -20,6 +20,9 @@ Usage:
   swarm_log.py frontier  --cycle 42 [--ground-truth '{...}'] [--json]
       # deterministic per-task next-stage (done/resume/dispatch/crashed) from
       # the log, reconciled against ground truth if given — resume-cycle Step 3
+  swarm_log.py watch --cycle 42 [--interval 3] [--once]
+      # ambient live swimlane view (one row per role) in a side terminal —
+      # redraws on new events instead of re-running `status` by hand
 
 The log file defaults to ./.swarm/run-log.jsonl (repo root); override with --file.
 """
@@ -28,6 +31,7 @@ import datetime
 import json
 import os
 import sys
+import time
 
 DEFAULT_LOG = os.path.join(".swarm", "run-log.jsonl")
 
@@ -312,6 +316,70 @@ def cmd_status(args):
           f"{args.cycle}`; for the report: `swarm_log.py debrief --cycle {args.cycle}`.)")
 
 
+# --- watch (ambient live swimlane) -------------------------------------------
+SWIMLANE_ICON = {"done": "✅", "in_progress": "⏳", "blocked": "⛔",
+                  "crashed": "💥", "pending": "·"}
+
+
+def render_swimlane(events, cycle):
+    """One row per role — the latest work item each has touched and its status.
+    Pure function of the event list so it's directly testable (no I/O, no
+    clock) — the `watch` loop just calls this again on new events."""
+    if not events:
+        return f"🐝 cycle {cycle} — no events yet."
+    routed = first(events, "lane_routed")
+    done = first(events, "cycle_completed")
+    gates = [e for e in events if e["event"] == "gate"]
+    escs = [e for e in events if e["event"] == "escalation"]
+    lane = (routed or {}).get("lane", "?")
+    items = pair_work_items(events)
+    latest_by_role = {}
+    for it in items:  # later entries overwrite — items is chronological
+        latest_by_role[it["agent"]] = it
+
+    state = "✅ completed" if done else "⛔ blocked" if any(
+        it["status"] == "blocked" for it in items) else "running"
+    lines = [f"🐝 cycle {cycle} — lane {lane} — {state}", ""]
+    for role in ROLES:
+        it = latest_by_role.get(role)
+        if not it:
+            lines.append(f"  {role:<12} ·  idle")
+            continue
+        icon = SWIMLANE_ICON.get(it["status"], "·")
+        rd = f" (round {it['rounds']})" if it["rounds"] else ""
+        lines.append(f"  {role:<12} {icon}  {it['label']}{rd}")
+    if gates or escs:
+        lines.append("")
+        for g in gates:
+            lines.append(f"  ⚠️  gate: {g.get('detail', '(human gate)')}")
+        for e in escs:
+            lines.append(f"  ⛔  escalation: {e.get('detail', '(needs human)')}")
+    lines.append("")
+    lines.append(f"~{total_tokens(events)/1000:.1f}k tokens · {len(events)} events · "
+                  f"last activity {events[-1].get('ts', '?')}")
+    return "\n".join(lines)
+
+
+def cmd_watch(args):
+    try:
+        while True:
+            events = read_events(args.file, args.cycle)
+            out = render_swimlane(events, args.cycle)
+            if not args.once:
+                sys.stdout.write("\x1b[2J\x1b[H")  # clear screen, home cursor
+            print(out)
+            if args.once:
+                return
+            done = events and first(events, "cycle_completed")
+            if done:
+                print("\n(cycle completed — exiting watch)")
+                return
+            print(f"\n(refreshing every {args.interval}s — Ctrl-C to stop)")
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        return
+
+
 # --- checklist --------------------------------------------------------------
 def cmd_checklist(args):
     events = read_events(args.file, args.cycle)
@@ -494,6 +562,12 @@ def main():
     fr.add_argument("--ground-truth", help="JSON: open_prs/merged_prs/sub_issues/worktrees, reconciled over the log")
     fr.add_argument("--json", action="store_true", help="machine-readable output")
     fr.set_defaults(func=cmd_frontier)
+
+    wa = sub.add_parser("watch", help="ambient live swimlane view (redraws on new events)")
+    wa.add_argument("--cycle", required=True)
+    wa.add_argument("--interval", type=float, default=3.0, help="poll interval in seconds (default 3)")
+    wa.add_argument("--once", action="store_true", help="render once and exit (no loop) — useful for scripting/tests")
+    wa.set_defaults(func=cmd_watch)
 
     args = ap.parse_args()
     args.func(args)

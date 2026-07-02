@@ -42,6 +42,11 @@ table and the `risk:*` flags that force Deep.
 | `/swarm:update [ref]` | bump this repo's pinned ref to adopt the latest (or a given) central release |
 | `/swarm:help` | full in-tool reference |
 
+Any `/swarm:*` command also gets a quiet, once-a-day advisory if the pinned
+version is behind the central repo's latest release ("run `/swarm:update` to
+upgrade") — a `UserPromptSubmit` hook, cached so it costs nothing beyond one
+GitHub check a day, and silent on plain (non-swarm) prompts.
+
 You can also run work async: file/assign an Issue with the `swarm:async` label
 and the scheduled job picks it up — no session needed. `lane:*`/`triage` are
 routing/telemetry only and never themselves launch a run; see [async job-picker

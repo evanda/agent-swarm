@@ -33,11 +33,13 @@ Fresh-run flow:
 1. If given a description rather than an issue, offer to file an Issue first
    (intake is GitHub Issues). If given an issue number/URL, read it.
 2. **Claim before labelling.** Post a machine-readable claim comment on the issue
-   *before* applying any `lane:*` labels — async job-pickers watch for `lane:*`
-   and will start a parallel run if none is present:
+   *before* applying any `lane:*` labels:
    `🐝 Swarm Orchestrator — interactive run started <!-- swarm:claim mode=interactive -->`
    If an existing claim comment is already present from a different run, surface
-   it to the human before proceeding.
+   it to the human before proceeding — never start a second run on a claimed
+   issue. (`lane:*` is routing/telemetry only and never itself triggers a run;
+   the async picker only fires on the separate `swarm:async` opt-in label — see
+   the constitution's label taxonomy.)
 3. Run the **`route-issue`** skill → stamp `lane:*` and any `risk:*` labels, with
    a one-paragraph rationale.
 4. Execute the chosen lane by **delegating to subagents** (Explorer, Architect↔

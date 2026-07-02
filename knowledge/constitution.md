@@ -27,6 +27,13 @@ into this file only after they recur.
    silent edits, never auto-merge.
 9. **Minimize the DIY surface.** Depend on external tooling by default; own only
    genuine differentiators.
+10. **Every code change lands via a reviewed PR — no exceptions by entry point.**
+    Interactive and async/scheduled runs use the identical Implementer→Reviewer→
+    merge-queue path; nothing commits straight to a shared/integration branch.
+    A run must **claim an issue before starting** (post a machine-readable claim
+    comment / assign itself) and **skip any issue with a live claim** — this
+    applies symmetrically to interactive and async entry points, so the same
+    issue can't be worked twice concurrently.
 
 ## Risk flags (force the Deep lane or a human, regardless of apparent size)
 
@@ -66,7 +73,12 @@ Secrets or credentials in scope are an automatic escalation even without a label
 
 ## Label taxonomy
 
-- **Lane:** `lane:express` · `lane:standard` · `lane:deep`
+- **Lane:** `lane:express` · `lane:standard` · `lane:deep` — routing/telemetry
+  only, stamped by `route-issue` **after** a claim comment is posted. Never
+  auto-triggers a run by itself.
+- **Trigger:** `swarm:async` — the *only* label that launches an unattended
+  async run. Applying `lane:*`/`triage` alone must never start work; a human
+  (or the Orchestrator, once claimed) opts an issue into async explicitly.
 - **Risk:** `risk:auth` · `risk:data` · `risk:api` · `risk:money` · `risk:destructive`
 - **Status:** `triage` · `spec-review` · `in-progress` · `in-review` · `needs-human` · `blocked`
 - **Improvement:** `learning-proposal` · `external` · `retire-candidate` · `meta`

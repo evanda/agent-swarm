@@ -25,8 +25,12 @@ you summon it — a plain session with no `/swarm:` typed behaves 100% normally.
   (Express / Standard / Deep), and runs the lane: delegate → review → merge.
 - **`/swarm:express <description>`** — force the cheap Express lane for a known
   trivial, reversible, well-tested fix (sanity-checked; escalates if risky).
-- **Async (no session):** file/assign a GitHub Issue and add a `lane:*` (or
-  `triage`) label; the scheduled job picks it up.
+- **Async (no session):** file/assign a GitHub Issue and add the `swarm:async`
+  label; the scheduled job picks it up. `lane:*`/`triage` alone never triggers a
+  run — they're routing/telemetry, stamped after a claim. The async picker
+  claims before starting (skips issues with a live claim) and always lands its
+  result through the normal Implementer→Reviewer→merge-queue path, never a
+  direct commit.
 
 ### Watch it
 - **`/swarm:status [issue#]`** — what each agent is doing right now, idle roles,

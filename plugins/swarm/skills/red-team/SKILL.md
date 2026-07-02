@@ -31,6 +31,15 @@ A focused, risk-mode pass layered on top of the normal dialectic when any
 - Reversibility, blast radius, confirmation/gating, dry-run, idempotency, audit
   trail, scope-limiting.
 
+## Non-vacuous mechanism check
+
+A `[SEC]` test that *names* a mechanism as the thing preventing a failure must be
+proven to actually depend on it: disable or mutate the mechanism and confirm the
+test then fails. A test that passes either way is a vacuous guard — false
+confidence on exactly the work where a miss is a cheat hole. If a design
+decision or dialectic blocker rests on an assumed framework/library behavior,
+verify it against source or a spike before relying on it.
+
 ## Cross-cutting probes
 
 - What's the worst input? The worst timing (concurrency, retries, partial

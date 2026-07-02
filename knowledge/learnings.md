@@ -20,6 +20,48 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — Model choice should route by task class, not stay flat per role
+- **Context:** Issue #47 (spacewars M2/M3) — a flat Opus-implement/Sonnet-review policy ran verbatim relocations and doc/lint fixes at the same tier as `risk:security` pickup-adjudication work, while the adversarial passes that caught the real bugs got no upgrade.
+- **Failure class:** Model tier left implicit rather than routed means cheap mechanical work overpays (slow + costly) and the hardest adversarial/design work is under-resourced.
+- **Lesson:** Extend `route-issue` to stamp a model tier (`fast`/`standard`/`deep`/`adversarial`) per task/role from a matrix in `.swarm/config.json`, on top of the existing lane. The cross-model-review invariant (reviewer ≠ implementer model) still applies as a constraint over tier selection.
+- **Scope:** shared.
+- **Status:** promoted-to(route-issue skill, .swarm/config.json `model_tiers`).
+
+## 2026-07-02 — Pin shared cross-task interfaces before fan-out
+- **Context:** Issue #46 (spacewars M3/M4, recurring across two milestones) — a producer task emitted one event shape while the consumer task expected another; each side inferred independently and integration had to bridge the mismatch.
+- **Failure class:** Parallel tasks that share an interface (data shape, event payload, field name) but aren't given a pinned contract will diverge — neither task is individually wrong, the gap is a missing shared spec.
+- **Lesson:** `spec-plan-tasks` tasks.md must pin exact shared data shapes/event payloads/field names as a named contract every side codes against, whenever tasks fan out in parallel across a shared boundary.
+- **Scope:** shared.
+- **Status:** promoted-to(spec-plan-tasks skill).
+
+## 2026-07-02 — Split read/write authority across a trust boundary needs a pinned reconciliation model
+- **Context:** Issue #45 (spacewars M3, decision D7a) — a value drained client-side and credited server-side was modeled as server-owned only; the server value never drained and clamped credits no-opped, silently breaking ~50% of pickups. Passed the full design dialectic and three implementation tasks; caught only at final acceptance.
+- **Failure class:** A field mutated by both sides of an authority/trust boundary but modeled as single-owned is silently incoherent — each task's slice looks locally correct, so it slips design review.
+- **Lesson:** Add a split-authority design-smell check to `spec-plan-tasks`' plan stage: when one side produces a value and the other consumes or also mutates it across a trust boundary, pin the explicit reconciliation model (server-absolute vs. client-owned-with-server-deltas/ledger) before fan-out.
+- **Scope:** shared.
+- **Status:** promoted-to(spec-plan-tasks skill).
+
+## 2026-07-02 — Multi-component milestones need an early end-to-end smoke, not just per-package green
+- **Context:** Issue #44 (spacewars M2, #80) — server and client SDK were on incompatible protocol versions; every per-package unit suite stayed green through three tasks while every real client join was rejected. Surfaced only at final two-tab acceptance.
+- **Failure class:** Components tested in isolation can all pass while the integration between them is broken; unit-green is not feature-working.
+- **Lesson:** When a milestone spans a client↔server or other multi-component boundary, `spec-plan-tasks` decomposition must include an early cross-component integration-smoke task (two real endpoints exchanging state) before the big fan-out, and acceptance criteria must include a real end-to-end probe.
+- **Scope:** shared.
+- **Status:** promoted-to(spec-plan-tasks skill).
+
+## 2026-07-02 — A test naming a security mechanism must be proven non-vacuous
+- **Context:** Issue #43 (spacewars M3/T4, PR #92) — a `[SEC]` test claimed a specific removal call was load-bearing for evicting a collected entity from client state; mutation-testing it (commenting out the call) showed the test still passed, because the framework's map-level DELETE covered the path regardless. The entire dialectic blocker rested on an unverified framework assumption.
+- **Failure class:** A test that names a mechanism as the thing preventing a failure can pass whether or not that mechanism runs — a vacuous guard giving false confidence, worst on `risk:security` work.
+- **Lesson:** For any test asserting a specific mechanism prevents a failure (mandatory for `[SEC]`/`risk:security`), the reviewer verifies non-vacuity by disabling/mutating the mechanism and confirming the test fails. A design blocker resting on assumed framework behavior must be source- or spike-verified. Added to `review-checklist` and `red-team`.
+- **Scope:** shared.
+- **Status:** promoted-to(review-checklist skill, red-team skill).
+
+## 2026-07-02 — Review verification must run every configured gate, not just tests+typecheck
+- **Context:** Issue #42 (spacewars M2/M3, recurring twice) — two lint errors reached `main` because reviewers ran test+typecheck but not lint, despite lint being a repo-enforced gate. Both were trivially auto-fixable and slipped an otherwise-thorough cross-model review.
+- **Failure class:** A reviewer's local verification omitting a gate the repo already enforces lets tooling-catchable defects reach `main` anyway.
+- **Lesson:** `review-checklist`'s Tests section now requires running the repo's full configured verification set (typecheck + test + lint/format, whatever `package.json`/CI defines), treating a lint/format failure as at least a nit — blocking if already on `main`.
+- **Scope:** shared.
+- **Status:** promoted-to(review-checklist skill).
+
 ## 2026-07-02 — Self-verify after a multi-file edit is a per-role gap, not a one-time fix
 - **Context:** Issue #28 — a `swarm:architect` round-2 dialectic revision hit a mid-write API disconnect; two of three critique fixes never landed, but all three files had fresh mtimes and looked complete. The 2026-06-30 cycle (PR #22) had already added a self-verify re-read step to `implementer.md` for the same class of failure, but the Architect — a second role that edits multiple artifacts per pass — still had no equivalent instruction, and it was the Architect that failed here.
 - **Failure class:** A self-verification instruction added to one generator role does not generalize to other roles that share the same failure mode (multi-file edit, no post-write re-read). Each role needs the instruction stated explicitly; agents don't infer it across role boundaries.

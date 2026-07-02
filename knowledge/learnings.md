@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — WHERE-routing must gate every issue filing, not just learning-proposals
+- **Context:** Issue #31 — the Scribe's follow-up-issue-filing responsibility defaulted to the active working repo with no WHERE check, while the sibling learning-proposal responsibility already used the `promote-learning` litmus. During the bub #187 run this put four framework-level `swarm:infra` issues onto the project repo instead of the shared swarm repo; they had to be transferred by hand (became agent-swarm#26–#30), and a combined issue had to be split into a portable contract + a project-specific recipe after the fact.
+- **Failure class:** A routing discipline defined for one output type (learning-proposals) doesn't automatically apply to a sibling output type (follow-up issues) that shares the same underlying WHERE question — each output path needs the gate stated explicitly, not inferred by analogy.
+- **Lesson:** Scribe's follow-up-issue step now runs the same `promote-learning` WHERE litmus before filing (portable → shared swarm repo with label existence confirmed; project-specific → project repo; mixed → two cross-linked issues), and records which repo each issue landed on and why.
+- **Scope:** shared.
+- **Status:** promoted-to(scribe.md).
+
 ## 2026-07-02 — A routing label must never double as an unattended-work trigger
 - **Context:** Issue #9 (downstream repo) — an interactive `/swarm:start` run stamped `lane:standard` on an issue as part of routing; an async scheduled job watching for `lane:*` picked up the same label as its trigger and independently implemented the issue, committing straight to the shared `claude-async` branch with no PR and no review. Two divergent implementations collided; recovery required a manual `git revert`.
 - **Failure class:** A label meant for one purpose (routing/telemetry, applied mid-run) was overloaded as a second purpose (async trigger), so an unrelated action (stamping the routing label) silently launched a second, unattended, unreviewed build of the same issue. Compounded by the async path skipping the review gate every other swarm path enforces.

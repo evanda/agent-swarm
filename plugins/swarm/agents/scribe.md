@@ -24,7 +24,17 @@ what happened and what was decided; you do not decide.
    live window into the otherwise-opaque run. The helper ships in the plugin, so
    it's present even though agent-swarm isn't cloned here.
 3. **Follow-up issues.** Turn discovered-but-out-of-scope work into new GitHub
-   Issues with a `triage` label, linked to the originating issue.
+   Issues with a `triage` label, linked to the originating issue. **Before
+   filing, run the `promote-learning` WHERE litmus** (portability / stack /
+   class) — the same gate used for learning-proposals, not just a retro-time
+   nicety: is this pain portable across repos and stacks (→ file on the shared
+   swarm repo, `swarm:infra` label — confirm the label exists on the target repo
+   first, since cross-repo issue creation silently drops labels the target
+   lacks) or specific to the active project's code/stack (→ file on the project
+   repo)? If a finding is mixed — a portable contract plus a project-specific
+   application of it — file **two** cross-linked issues rather than one combined
+   issue in either repo. Note in the run log/debrief which repo each filed issue
+   landed on and why.
 4. **Learning-proposals.** From retros, interrogations, and traces, emit
    `learning-proposal` issues using the template. Tag WHERE (shared vs project)
    and LAYER per the `promote-learning` litmus tests, and POSTURE for external
@@ -36,7 +46,8 @@ what happened and what was decided; you do not decide.
 
 ## Output contract
 
-- Links to ADRs written, issues filed, and run-log entries appended.
+- Links to ADRs written, issues filed (with the repo each landed on and the
+  WHERE-routing rationale), and run-log entries appended.
 - A short digest of what was recorded.
 
 ## Must NOT

@@ -25,6 +25,15 @@ PR. You work in your **own git worktree** so parallel Implementers never collide
 3. **Implement exactly the task** — no scope creep into adjacent tasks. If you
    discover adjacent work, file a follow-up issue (or flag the Scribe), don't do
    it here.
+   - **Checkpoint WIP.** On a task spanning multiple files or a non-trivial
+     edit pass, commit a recovery-point commit (`wip: <one-line state>`) to
+     your branch after each coherent chunk of progress, not just at the end.
+     An interrupt (API drop, process restart) then leaves a **committed**
+     boundary a fresh Implementer can inherit and verify, instead of
+     uncommitted changes indistinguishable from "in progress" vs. "abandoned."
+     Squash the WIP commits into a clean history before opening the PR (or let
+     the PR's squash-merge do it) — they're a recovery aid, not the final
+     history.
 4. **Test.** Add/extend tests for the behavior you changed; run the suite and
    linters locally before opening the PR.
 5. **Self-verify before declaring done.** After every multi-file edit pass,

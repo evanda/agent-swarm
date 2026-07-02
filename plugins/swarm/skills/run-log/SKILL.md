@@ -57,7 +57,10 @@ these events will produce an empty checklist and an unrenderable debrief.
 
 **Pairing:** `agent_dispatched` and `agent_returned` are matched by
 `(agent, task|detail)` — keep `--detail`/`--task` identical across the pair so the
-checklist closes the item. Record `--tokens` when known (even rough) so cost is
+checklist closes the item. **Always pass `--task <sub-issue-id>`** for Deep/
+Standard-lane work (not just `--detail`): it's the key `swarm_log.py frontier`
+groups on to compute each sub-issue's next stage on resume (the `resume-cycle`
+skill). Record `--tokens` when known (even rough) so cost is
 visible.
 
 ## The live checklist (the human's window into the run)

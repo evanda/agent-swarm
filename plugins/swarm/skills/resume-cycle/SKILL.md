@@ -71,6 +71,26 @@ recording the correction. Never rewrite past events — the log is append-only.
 
 ## Step 3 — Compute the frontier
 
+Get a deterministic starting point instead of re-deriving it by hand — the
+helper computes each `--task`-tagged sub-issue's next stage from the log,
+reconciled against ground truth if you pass it (reality wins, same rule as
+Step 2):
+
+```
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" frontier --cycle <issue#> \
+    [--ground-truth '{"sub_issues": {...}, "worktrees": {...}, "merged_prs": [...]}']
+```
+
+Returns per task: `done` (merged, or ground truth shows closed — skip),
+`resume` (started but not merged — continue, don't restart), `dispatch` (no
+work logged yet), or `crashed` (an `agent_returned --status crashed` was
+recorded — **never** auto-resume; re-verify against spec/critique first, per
+Step 4). This is enforced code (`compute_frontier` in `swarm_log.py`, covered
+by structural eval fixtures under `knowledge/evals/resume/`), not just
+model-followed instructions — use it as the starting point, then apply
+judgment for anything it can't see (e.g. a sub-issue with no `--task`-tagged
+events, or nuance the ground truth summary didn't capture).
+
 For each sub-issue, determine the next incomplete stage, using the **already-
 stamped lane** (do not re-route) and its caps:
 

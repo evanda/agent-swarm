@@ -1,0 +1,35 @@
+{
+  "id": "resume-crashed-agent",
+  "archetype": "resume",
+  "input": {
+    "description": "Cycle 100: t1 done and merged. t3's implementer was mid-write when the process restarted; the orchestrator confirmed the interruption and logged agent_returned with status=crashed (partial edits, uncommitted worktree). t4 was never dispatched.",
+    "cycle": 100,
+    "events": [
+      {"event": "cycle_started", "cycle": "100"},
+      {"event": "lane_routed", "cycle": "100", "lane": "lane:deep"},
+      {"event": "agent_dispatched", "cycle": "100", "agent": "implementer", "task": "t1", "detail": "add rate limiter"},
+      {"event": "pr_merged", "cycle": "100", "task": "t1", "detail": "PR #61"},
+      {"event": "agent_returned", "cycle": "100", "agent": "implementer", "task": "t1", "status": "done"},
+      {"event": "agent_dispatched", "cycle": "100", "agent": "implementer", "task": "t3", "detail": "add retry backoff"},
+      {"event": "agent_returned", "cycle": "100", "agent": "implementer", "task": "t3", "status": "crashed",
+       "detail": "process restart mid-write; worktree left uncommitted"}
+    ],
+    "ground_truth": {
+      "open_prs": [],
+      "merged_prs": ["PR #61 — t1: add rate limiter"],
+      "sub_issues": {
+        "t1": "closed",
+        "t3": "open, label: in-progress, assignee: implementer",
+        "t4": "open, label: triage"
+      },
+      "worktrees": {
+        "t3": "present, uncommitted changes, partial diff against spec"
+      }
+    }
+  },
+  "expect": {
+    "frontier": "t1 done; t3 must be re-verified against spec before any gate advances (crashed, not silently resumed as done); t4 has no work logged yet and must be freshly dispatched",
+    "frontier_tasks": {"t1": "done", "t3": "crashed", "t4": "dispatch"},
+    "rationale_contains": ["crashed", "verify", "t3", "t4"]
+  }
+}

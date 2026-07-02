@@ -16,6 +16,8 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "..", "plugins", "swarm", "scripts"))
+from swarm_log import compute_frontier  # noqa: E402
 
 VALID_LANES = {"lane:express", "lane:standard", "lane:deep"}
 VALID_RISKS = {"risk:auth", "risk:data", "risk:api", "risk:money", "risk:destructive"}
@@ -56,7 +58,27 @@ def validate_structure(fixtures):
                 errors.append(f"{rel}: unknown risk flag {r!r}")
         if not isinstance(fx.get("input"), dict):
             errors.append(f"{rel}: 'input' must be an object")
+            continue
+        if fx["archetype"] == "resume" and "frontier_tasks" in expect:
+            errors += validate_resume_frontier(rel, fx)
     return errors
+
+
+def validate_resume_frontier(rel, fx):
+    """resume-cycle's frontier reconcile (Step 3) is enforced code
+    (swarm_log.compute_frontier), not just model-followed instructions — assert
+    it against each resume fixture's structured events + ground truth so a
+    regression here fails CI structurally (issue #11)."""
+    inp = fx["input"]
+    events = inp.get("events")
+    if not events:
+        return [f"{rel}: archetype 'resume' with frontier_tasks needs 'input.events' "
+                f"(structured events, not just the human-readable summary)"]
+    frontier, _notes = compute_frontier(events, inp.get("ground_truth"))
+    expected = fx["expect"]["frontier_tasks"]
+    if frontier != expected:
+        return [f"{rel}: compute_frontier produced {frontier}, expected {expected}"]
+    return []
 
 
 def run_llm(fixtures):

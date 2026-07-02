@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — A reconcile step this consequential needs enforced code, not just model-followed instructions
+- **Context:** Issue #11 — `resume-cycle`'s Step 2/3 (reconcile against ground truth, compute the frontier) was prose the Orchestrator was trusted to follow correctly under messy real state (a merged-but-unlogged PR, a half-claimed sub-issue, a missing log on a different machine) — nothing verified the resulting frontier was actually correct.
+- **Failure class:** A judgment call with a large blast radius (mis-judging the frontier can redo already-shipped work or silently skip a crashed task) left entirely to model-followed prose has no regression signal — a future skill edit could quietly break the reconcile logic and nothing would catch it before a live resume did.
+- **Lesson:** Added `compute_frontier` to `swarm_log.py` (`frontier` subcommand) — a deterministic, testable function that computes each task's next stage (done/resume/dispatch/crashed) from the log, reconciled against ground truth. Wired two `knowledge/evals/resume/` fixtures (interrupted mid-review, crashed mid-write) into `run.py`'s always-on structural check (no API key needed) asserting the exact expected frontier — confirmed non-vacuous by mutating the function and watching the eval fail. `resume-cycle` Step 3 now calls this as the starting point rather than re-deriving it by hand.
+- **Scope:** shared.
+- **Status:** promoted-to(swarm_log.py, resume-cycle skill, knowledge/evals/resume/). Per the issue's own acceptance criteria, watch the first live resume before considering this fully proven — the fixtures cover the states we've seen, not necessarily every messy-real-world shape.
+
 ## 2026-07-02 — A degraded runtime must be a visible signal, not a silent fallback
 - **Context:** Issue #27 — a process restart mid-Deep-lane-run dropped the swarm plugin/MCP connection; branded `swarm:*` agent types and the GitHub MCP became unavailable, and the run silently continued on `general-purpose` agents + the `gh` CLI, losing the Scribe/Integrator roles for the rest of the run. The downgrade was discovered via a tool-not-found error, not signalled.
 - **Failure class:** When a capability the run depends on silently disappears (here: harness-level plugin/MCP reconnect after restart, outside this repo's control), continuing on a degraded fallback without surfacing that fact turns an infrastructure hiccup into an undetected scope/quality gap.

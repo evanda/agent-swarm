@@ -55,6 +55,15 @@ subagents are for.
      wait; then fan out Implementers (one sub-issue each), each paired with a
      Reviewer loop (cap 3); then Integrator drives the merge queue. Invoke
      `red-team` when any risk flag is present.
+   - **Right-size each sub-issue's own lane — a Deep cycle isn't uniform
+     ceremony.** The cycle-level lane sets the *design* dialectic and the human
+     spec gate; per-task review depth still follows `route-issue`'s table
+     applied to *that task in isolation*. A trivial, reversible, single-component
+     follow-up on already-reviewed code (e.g. a visual tweak after the core
+     sync-gate task shipped) runs Express/Standard review depth, not a full
+     Deep round — reserve Deep review ceremony for the risk-flagged or
+     cross-cutting tasks that earned it. Never drop below Express's single-pass
+     review, and never skip review on a risk-flagged task regardless of size.
 3. **Decompose** into sub-issues — one delegatable unit per Implementer. Each
    sub-issue is a lock (claim-before-work): the Implementer assigns itself before
    starting. **Batch micro-tasks** (trivially small, same component) into one
@@ -62,6 +71,15 @@ subagents are for.
    substantial. **Maximize the independent set** (tasks that can fan out in
    parallel); name the serial spine explicitly. If it exceeds 3 sequential hops,
    challenge the decomposition before fan-out.
+   - **Pipeline, don't barrier.** Dispatch the next independent task's
+     Implementer as soon as it's unblocked — don't wait for the current task's
+     review or merge to finish first. Hand a returned PR to its Reviewer
+     immediately; don't synchronously poll/`--watch` CI before moving on to the
+     next dispatch. Enqueue a low-risk, approved PR into the merge queue and
+     continue — the queue (Integrator) runs required checks and merges on green
+     in the background; only block the *next dependent* task on it, not the
+     whole cycle. Serialize strictly on genuine dependencies (a sync-gate task,
+     a shared-contract producer) and human gates — everything else fans out.
 4. **Synthesize.** Collect condensed results, resolve cross-task questions,
    update the issue graph, and report status to the human in plain terms.
    **If an agent crashed or was interrupted mid-run:** verify its artifacts against

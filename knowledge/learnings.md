@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-02 — Deep-lane ceremony should be right-sized per task and pipelined, not uniform and serial
+- **Context:** Issue #20 — a correct 12-task Deep-lane run (~2.11M tokens, 34 agent-runs) took far too long: every task, even a 1–3 line UX tweak on already-reviewed code, paid the full lifecycle (worktree → implement → CI `--watch` → different-model review → merge → sync), and the critical path was mostly-serial with genuine parallelism the exception.
+- **Failure class:** Two compounding causes — (1) the cycle-level lane was treated as uniform per-task ceremony instead of a design/gate-level setting, so trivial follow-ups paid full Deep review depth; (2) the Orchestrator barriered on each task's review/CI before dispatching the next independent task instead of pipelining, turning parallelizable work into a serial chain.
+- **Lesson:** A Deep cycle's lane sets the *design* dialectic and human spec gate; per-task review depth still follows `route-issue`'s table applied to that task in isolation — a trivial single-component follow-up gets Express/Standard review, never a full Deep round, and never less than Express's single pass. Separately: dispatch the next independent task as soon as unblocked, hand a returned PR to review immediately, and enqueue-and-continue rather than synchronously polling CI — serialize only on genuine dependencies and human gates. (Micro-task batching and minimizing the serial spine were already covered by an earlier `spec-plan-tasks` fix; model-tiering by #47.)
+- **Scope:** shared.
+- **Status:** promoted-to(orchestrator.md).
+
 ## 2026-07-02 — A reconcile step this consequential needs enforced code, not just model-followed instructions
 - **Context:** Issue #11 — `resume-cycle`'s Step 2/3 (reconcile against ground truth, compute the frontier) was prose the Orchestrator was trusted to follow correctly under messy real state (a merged-but-unlogged PR, a half-claimed sub-issue, a missing log on a different machine) — nothing verified the resulting frontier was actually correct.
 - **Failure class:** A judgment call with a large blast radius (mis-judging the frontier can redo already-shipped work or silently skip a crashed task) left entirely to model-followed prose has no regression signal — a future skill edit could quietly break the reconcile logic and nothing would catch it before a live resume did.

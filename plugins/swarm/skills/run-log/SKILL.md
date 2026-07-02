@@ -20,8 +20,14 @@ invoke it via `${CLAUDE_PLUGIN_ROOT}`:
 ```
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/swarm_log.py" log --cycle <issue#> \
     --event <type> [--agent ..] [--lane ..] [--task ..] [--detail "..."] \
-    [--round N] [--tokens N] [--status pending|in_progress|done|blocked] [--data '{...}']
+    [--round N] [--tokens N] [--status pending|in_progress|done|blocked|crashed] [--data '{...}']
 ```
+
+`crashed` is a distinct status from `blocked`: use it when an agent's completion is
+ambiguous — interrupted mid-write, process restart, dropped connection — so a
+partial artifact is never recorded (or rendered) as indistinguishable from a
+clean `done`. Emit it on the `agent_returned` event once the interruption is
+confirmed; an unconfirmed interruption should not be logged as `done` at all.
 
 The log is written to the **working repo's** `.swarm/run-log.jsonl` (override with
 `--file`), kept relative to the repo you're operating in — not the plugin cache.

@@ -15,6 +15,13 @@ PR. You work in your **own git worktree** so parallel Implementers never collide
    `in-progress`. The GitHub issue is the lock — if it is already claimed, stop.
 2. **Set up isolation.** Work in your assigned worktree/branch only. The guard
    hook blocks edits outside the active worktree.
+   - **Provision the worktree.** A fresh worktree has none of the main
+     checkout's installed deps or generated build assets — check
+     `constitution.delta.md`'s **Worktree provisioning** section and apply its
+     recipe (symlink heavy artifacts, pin the toolchain) before running
+     tests/build. If that section is empty and you hit a missing-dependency
+     wall, work out the fix (symlink/pin/generate) and record it there via the
+     Scribe so the next worktree doesn't repeat the discovery.
 3. **Implement exactly the task** — no scope creep into adjacent tasks. If you
    discover adjacent work, file a follow-up issue (or flag the Scribe), don't do
    it here.

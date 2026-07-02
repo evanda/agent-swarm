@@ -17,6 +17,27 @@ that one leg. The pipeline it sits in — Reviewer (different model), Integrator
 merge, Scribe debrief — is driven by *you*, the Orchestrator, and only a rebuilt
 Orchestrator can drive it. This skill is that rebuild.
 
+## Step 0 — Verify the swarm context itself survived
+
+A resume is often triggered by the same event that can degrade the *tooling*,
+not just the cycle state: a process restart can drop the swarm plugin/MCP
+connection, so the branded `swarm:*` agent types and `plugin:swarm:github` MCP
+silently become unavailable — the run would then continue on `general-purpose`
+agents + the `gh` CLI, discovered only via a tool-not-found error unless checked
+for. Before rehydrating cycle state, confirm the swarm context is intact:
+
+- Try to reference a branded agent type (e.g. `swarm:implementer`) — resolvable
+  vs. tool-not-found.
+- Confirm the `plugin:swarm:github` MCP is connected, if the cycle depends on it.
+
+If either is missing, **do not silently fall back**. Emit an explicit degraded
+signal — `swarm_log.py log --cycle <issue#> --event note --detail "swarm context
+degraded: branded agents/MCP unavailable, continuing on general-purpose
+agents/gh CLI"` — and tell the human, so the fallback is a deliberate, visible
+decision rather than a silent downgrade discovered mid-run. Re-summoning the
+plugin (e.g. `/plugin install swarm@swarm` + `/reload-plugins`, if available in
+this session) is preferable to proceeding degraded when the human can do it.
+
 ## Step 1 — Rehydrate from the record
 
 Read the cycle's prior state. Source of truth, richest first:

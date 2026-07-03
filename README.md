@@ -47,6 +47,15 @@ version is behind the central repo's latest release ("run `/swarm:update` to
 upgrade") — a `UserPromptSubmit` hook, cached so it costs nothing beyond one
 GitHub check a day, and silent on plain (non-swarm) prompts.
 
+**Manually pinning a version** (if you'd rather not run `/swarm:update`): the
+version lives in exactly one place per surface — in *this* repo,
+`plugins/swarm/.claude-plugin/plugin.json`'s `version` field (bumped only via
+`scripts/bump_version.py`); in a **consumer** repo, the `source.ref` field of
+the `swarm` entry in its `.claude/settings.json` (seeded from
+[`templates/consumer/settings.json`](templates/consumer/settings.json)). Edit
+that one `ref` string to the target tag (e.g. `"v0.3.0"`) and reload the
+plugin.
+
 You can also run work async: file/assign an Issue with the `swarm:async` label
 and the scheduled job picks it up — no session needed. `lane:*`/`triage` are
 routing/telemetry only and never themselves launch a run; see [async job-picker

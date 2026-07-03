@@ -82,3 +82,17 @@ Secrets or credentials in scope are an automatic escalation even without a label
 - **Risk:** `risk:auth` · `risk:data` · `risk:api` · `risk:money` · `risk:destructive`
 - **Status:** `triage` · `spec-review` · `in-progress` · `in-review` · `needs-human` · `blocked`
 - **Improvement:** `learning-proposal` · `external` · `retire-candidate` · `meta`
+
+## PR conventions
+
+- **Use GitHub's closing keywords for any issue a PR fully resolves** — `Closes
+  #N` / `Fixes #N` / `Resolves #N` in the PR body (not just a bare `#N`
+  mention), one per issue. Since merges are always human-reviewed (never
+  auto-merged), the keyword only fires the auto-close at that human-approved
+  merge — it doesn't weaken the review gate, it just removes a manual
+  bulk-close step afterward.
+- **Only close what's actually resolved.** If a PR partially addresses an issue
+  (a real gap remains — cf. `learnings.md`'s #27 entry), reference it plainly
+  (`Relates to #N` / `Addresses #N`, no closing keyword) and leave the
+  remaining gap stated in a comment, rather than closing early or leaving a
+  resolved issue open for a manual follow-up close.

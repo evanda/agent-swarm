@@ -152,3 +152,52 @@ Format per entry:
 - **Lesson:** Treat a maintained generic tool as a **safety floor beneath** our bespoke layer, not a swap: keep `guard.py` for swarm invariants and let the external plugin cover the generic SAST surface we choose not to hand-roll. The ledger `adopt` row waited for a concrete release pin (ledger rule: every `adopt` row MUST carry a pin); now pinned at `security-guidance@2.0.6` (requires Claude Code ≥ v2.1.144) and shipped as the `write-time-security-guard` row — resolving #5.
 - **Scope:** shared.
 - **Status:** tentative.
+
+## 2026-07-03 — A wire-protocol/SDK mismatch is invisible to a green suite when every test fakes the transport boundary
+- **Context:** Issues #59/#63 — two spacewars milestones (#80, #108/#119) shipped with the real client-server SDK path silently broken (a version mismatch, then a stale forwarding-shim allowlist dropping fields) while every unit/integration test — because each faked the transport or called the SDK client directly, bypassing the app's own bootstrap/wiring shim — stayed green. Both times, only a human play-test caught it; #63 names a third recurrence (#164) of the same shim-allowlist root cause across three milestones.
+- **Failure class:** A test suite that never exercises the *real* transport/SDK object, or that calls it directly while skipping the app's own bootstrap/wiring layer, cannot catch a mismatch or a dropped field in that layer — "unit-green" is not "wire-compatible."
+- **Lesson:** For any Deep-lane task changing a client-server wire boundary (SDK bump, message/event schema, new client integration) — and especially when a milestone adds a CLIENT-consumed server callback or synced field — require a real-client smoke test that drives the actual SDK/client through the app's real bootstrap/wiring path (not a fake room/transport, not the SDK object called in isolation), mutation-verified (reintroduce the bug, confirm only that test fails). Recurred 3 times in one project before being generalized here, so it's hardened directly into the skill layer rather than starting purely tentative.
+- **Scope:** shared.
+- **Status:** promoted-to(review-checklist skill, spec-plan-tasks skill). A compile-time exhaustiveness guard on manual callback-forwarding allowlists (#63's point 2) and a dev-only render-layer inspection hook (#63's point 3) are useful but Colyseus/Phaser-specific in their concrete form — left as a project-level pattern rather than promoted into shared scaffolding verbatim.
+
+## 2026-07-03 — Compound "AND" acceptance criteria let one half ship unbuilt
+- **Context:** Issue #62 (spacewars #126, M5 AC10) — a single acceptance criterion joined a client-side pre-gate and a server-driven reject signal with "AND"; only the second half was implemented, but the combined check passed because the reject-signal test path didn't distinguish "gated but I clicked anyway" from "never gated."
+- **Failure class:** A single test/check that can pass via either conjunct alone doing the work will let the other conjunct ship unbuilt — common to any compound AC ("validated AND error shown," "requires auth AND is logged"), not spacewars-specific.
+- **Lesson:** When authoring or reviewing an AC of the form "A AND B" where A and B are independently buildable, split it into two criteria with two separate checks; ask whether the test path actually exercises both halves or only one.
+- **Scope:** shared.
+- **Status:** promoted-to(spec-plan-tasks skill).
+
+## 2026-07-03 — Dialectic-round continuations must stay on the branded agent type
+- **Context:** Issue #61 (spacewars #126, M5 dialectic Round 2) — a re-dispatch after a stall used the generic `claude` agent type instead of `swarm:architect`; it hallucinated a dependency and returned a plausible "resolved" summary with zero actual file edits, caught only because the Orchestrator checked the diff rather than trusting the report.
+- **Failure class:** A generic agent substituted for a branded one loses that role's protocol grounding (CONCEDE/REBUT/ACCEPT-AS-RISK, self-verify-after-edit) while still being able to produce a summary indistinguishable from a real one — the failure is invisible without checking the artifact.
+- **Lesson:** Dispatch every dialectic round — including continuations/re-dispatches after a stall — via the branded `swarm:*` type, never a generic fallback; verify against the file diff whenever a round's reported effort looks thin or a retry occurred.
+- **Scope:** shared.
+- **Status:** promoted-to(dialectic skill). One occurrence — revisit if it recurs to see whether a structural (non-prose) check is warranted, similar to `compute_frontier`'s enforced-code treatment.
+
+## 2026-07-03 — Orchestration hygiene: verify the worktree, verify the spawn, verify repo-state claims
+- **Context:** Issue #64 — a ~10h autonomous spacewars run hit three distinct "trusted a self-report instead of the ground truth" failures: (1) Implementers repeatedly edited the main checkout instead of their assigned worktree, caught only by a manual pre-commit `git diff --stat`; (2) the Orchestrator once logged `agent_dispatched` for a reviewer without actually invoking the Agent tool, leaving a PR unreviewed for minutes; (3) an Architect asserted a milestone "appears MERGED" without checking `gh`/`git`, and it was actually open.
+- **Failure class:** All three are the same root cause (the M2/M3 retro's "verify diffs, not self-reports") recurring at different checkpoints — worktree location, dispatch actuality, and repo-state claims — each needing its own explicit check because the earlier fix didn't generalize across checkpoints automatically.
+- **Lesson:** Implementer asserts `git rev-parse --show-toplevel` matches its assigned worktree as its first action and again before its first edit. Orchestrator logs `agent_dispatched` only after the Agent tool call returns an id (not preemptively), and periodically reconciles logged dispatches against live tasks. Architect verifies any merged/closed/present claim against `gh`/`git` before it shapes a plan, holding the same evidence bar the Explorer already holds for code claims.
+- **Scope:** shared.
+- **Status:** promoted-to(implementer.md, orchestrator.md, architect.md).
+
+## 2026-07-03 — Right-size ceremony to the task's own risk, not just its model tier
+- **Context:** Issue #67 (spacewars #160) — two independent-file tasks (server + client, no data dependency) ran fully sequential instead of pipelined, and a non-`[SEC]` UI task paid full cross-model review + red-team + worktree isolation anyway. Neither is a quality-gate removal ask — both are "when/how many agents run," not "skip a check."
+- **Failure class:** Cost/throughput friction accumulates from ceremony applied uniformly (per lane or per cycle) rather than routed per task's actual risk and dependency shape — the existing model-tiering already solved this for *which model*, but not for *which gates run at all*.
+- **Lesson:** Extend risk-routing to the full gate stack: red-team + worktree isolation only for `risk:*`-flagged tasks; non-risk Deep-cycle tasks get one light cross-model review. Pipeline independent-file tasks (dispatch N+1 while N is in review) rather than barriering on each task's full lifecycle before starting the next — already partly hardened by the #20 fix, reinforced here with a second independent-file case. Architect-level mega-file decomposition (split a shared hot-file at milestone boundaries so tasks can parallelize), warm serial-lane agents, and prebuilt-worktree-base tooling are real but require repo/toolchain-specific recipes (à la the #30 worktree-provisioning split) — left as a project-level pattern for now, not promoted verbatim.
+- **Scope:** shared.
+- **Status:** promoted-to(orchestrator.md — risk-route-the-gate-stack point; pipelining already covered by the #20 fix).
+
+## 2026-07-03 — Test-suite re-runs are a token cost independent of test value
+- **Context:** Issue #66 (spacewars #160) — a single task's suite (245 server + 341 client tests) ran verbose ~5–8× across implementer iteration + reviewer + red-team, burning a large low-signal token share on re-printed `✓` lines, while the tests themselves caught real bugs (a vacuous-test class, live exploits). The waste is the *re-running and re-printing*, not the tests.
+- **Failure class:** A correct verification discipline ("prove the block ran," "run the full suite") doesn't specify *how many times* or *how verbosely*, so agents default to the safest-feeling choice (full verbose, repeatedly) rather than the cheapest sufficient one.
+- **Lesson:** Implementer runs targeted + dot-reporter during iteration, full suite once at the end. Reviewer confirms a named block executed by running only that block (targeted + verbose) plus its mutation check, not the whole suite verbose — one final dot-reporter full-suite run is sufficient overall-green confirmation. No coverage is dropped, only run count/verbosity.
+- **Scope:** shared.
+- **Status:** promoted-to(implementer.md, review-checklist skill).
+
+## 2026-07-03 — Long-running orchestrators may need to spawn a successor rather than degrade in place
+- **Context:** Issue #65 — a single, thin, one-occurrence report that long-running Orchestrator sessions accumulate context load and perform worse over a long cycle.
+- **Failure class:** Unbounded context growth in a persistent role (the Orchestrator, unlike cattle subagents, is the main session instance and doesn't naturally reset) degrades judgment quality with no built-in checkpoint.
+- **Lesson (tentative, not yet actioned):** Consider a self-initiated handoff — after a milestone or a sizeable context load, the Orchestrator writes a compact forward-looking state summary (resembling `resume-cycle`'s rehydration inputs) and a fresh instance picks up from it, retiring the old one. Not yet promoted to a skill: the proposal doesn't specify a concrete trigger threshold or how the handoff differs from an ordinary `resume-cycle` recovery, and there's only one occurrence. Revisit if this recurs or if a concrete context-budget signal is proposed.
+- **Scope:** shared.
+- **Status:** tentative.

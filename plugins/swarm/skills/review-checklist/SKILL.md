@@ -24,11 +24,27 @@ so is inventing blockers — score by confidence.
   verification set** — typecheck **and** test **and** lint/format (whatever
   `package.json`/CI defines) — not just typecheck+test. A lint/format failure is
   at least a nit; treat it as blocking if it's already on `main`.
+- **Run economically.** To confirm a specific block/test actually executed
+  (e.g. the "named `[SEC]` block ran" check below), run *that block only*,
+  targeted + verbose, plus its mutation check — not the whole suite verbose. One
+  final full-suite run with the dot/default reporter is sufficient to confirm
+  overall green; don't re-run the full verbose suite repeatedly.
 - For any test asserting a *specific mechanism* prevents a failure (mandatory for
   `[SEC]`/`risk:security`): verify it's **non-vacuous** — disable or mutate the
   mechanism and confirm the test fails. A test that passes whether or not the
   mechanism runs is a false guard. Corollary: a design blocker resting on assumed
   framework behavior must be source- or spike-verified, not taken from docs alone.
+- If the PR changes a **client-server wire boundary** (SDK version bump, message/
+  event schema, new client library integration): does a **real-client smoke
+  test** exercise the actual SDK/client against a real (not faked/stubbed) server
+  instance — not just tests that mock the transport layer? Verify it's
+  mutation-tested (temporarily reintroduce the bug; confirm only that test
+  fails). Unit tests that fake the transport can't catch a transport-layer/SDK-
+  version mismatch, however green the suite is. For a milestone that adds a
+  CLIENT-consumed server callback/synced field, the real-client probe must drive
+  the actual bootstrap/wiring path the production client uses (not just the SDK
+  client object directly) — a wiring shim between the SDK and the app can drop
+  fields that direct-SDK tests never see.
 
 **Risk surfaces** (escalate if mishandled)
 - `risk:auth` — access control intact, no privilege escalation, sessions sound.

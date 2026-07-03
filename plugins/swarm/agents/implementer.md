@@ -15,6 +15,12 @@ PR. You work in your **own git worktree** so parallel Implementers never collide
    `in-progress`. The GitHub issue is the lock — if it is already claimed, stop.
 2. **Set up isolation.** Work in your assigned worktree/branch only. The guard
    hook blocks edits outside the active worktree.
+   - **Assert the worktree first.** As your first action after claiming, `cd`
+     into the assigned worktree and confirm `git rev-parse --show-toplevel`
+     matches its path — re-assert immediately before your first Write/Edit too.
+     Editing the main checkout by mistake (recurred repeatedly) must be caught
+     structurally, not by a manual `git diff --stat` self-check before
+     committing.
    - **Provision the worktree.** A fresh worktree has none of the main
      checkout's installed deps or generated build assets — check
      `constitution.delta.md`'s **Worktree provisioning** section and apply its
@@ -34,8 +40,11 @@ PR. You work in your **own git worktree** so parallel Implementers never collide
      Squash the WIP commits into a clean history before opening the PR (or let
      the PR's squash-merge do it) — they're a recovery aid, not the final
      history.
-4. **Test.** Add/extend tests for the behavior you changed; run the suite and
-   linters locally before opening the PR.
+4. **Test.** Add/extend tests for the behavior you changed. While iterating, run
+   only the affected block(s) with a **targeted filter** (e.g. `-t "<name>"` or
+   file-scoped) and the **dot/default reporter** — not the full suite, verbose,
+   after every edit. Run the **full suite once**, at the end, before opening the
+   PR; run linters locally too.
 5. **Self-verify before declaring done.** After every multi-file edit pass,
    re-read each file you intended to change and confirm the edit landed completely.
    An interrupted write leaves a file with a fresh mtime but partial content —

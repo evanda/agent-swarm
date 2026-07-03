@@ -22,6 +22,13 @@ decision-recording requirement.
      change, viewport follows the update, tap targets ≥ 44 pt/dp, feedback on
      action, empty/error states handled. Functional-only criteria are incomplete
      for UI work.
+   - **Split compound ACs.** An acceptance criterion joining two independently-
+     buildable behaviors with "AND" (e.g. "a pre-check gate AND a post-rejection
+     signal"; "input is validated AND the error is displayed") must be written —
+     and later verified — as **two separate criteria**, each with its own check.
+     A single combined check can pass via either half alone doing the work,
+     letting the other ship unbuilt. Ask: does the test path for this AC exercise
+     *both* halves, or could either one alone make it pass?
 3. **plan** → write `specs/<issue-id>/plan.md`:
    - Approach; **key decisions with rejected alternatives + why**; affected
      components; data/contract impact; **test strategy**; rollout/rollback.
@@ -53,7 +60,11 @@ decision-recording requirement.
      placed *before* the big fan-out — a cheap headless probe is enough. The
      acceptance criteria must include this real end-to-end check, not only
      per-package unit suites; components can each pass in isolation while the
-     integration between them is broken.
+     integration between them is broken. If the milestone adds a **CLIENT-
+     consumed server callback or synced field**, the probe must drive the real
+     client's actual bootstrap/wiring path (not just the SDK/client object in
+     isolation) — a wiring shim between the SDK and the app can silently drop
+     fields that a direct-SDK test never exercises (see `review-checklist`).
 5. **clarify** — list open questions that block fan-out. Resolve with the
    Orchestrator/human before proceeding.
 

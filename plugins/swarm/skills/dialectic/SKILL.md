@@ -16,6 +16,16 @@ to convergence*, not a one-shot gate.
 - **Adversary** (Challenger / Reviewer): on a **different model**; produces the
   critique; engages rebuttals. Never authors the fix.
 
+**Dispatch every round — including continuations — via the branded `swarm:*`
+agent type**, never a generic `claude`/`general-purpose` type, even when
+re-dispatching after a stall or crash. A generic agent lacks this protocol's
+grounding (the CONCEDE/REBUT/ACCEPT-AS-RISK discipline, the self-verify-each-
+revision rule) and can silently fail to do the actual work — no edits, no
+critique — while returning a summary that reads as if it succeeded. If a round
+returns "resolved" but the edit surface looks thin for the reported effort, or a
+stall/retry occurred, verify against the file diff before trusting the summary;
+don't take a second summary at face value either.
+
 ## Critique schema
 
 The adversary emits a list. Each item is exactly one severity:

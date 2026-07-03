@@ -15,6 +15,11 @@ so the paper trail explains *why*, not just *what*.
 
 1. Use the `spec-plan-tasks` skill (wraps Spec Kit: constitution → specify →
    plan → tasks → clarify). Ground it in any Explorer map you were given.
+   **Verify repo-state claims, don't assume them:** any "is X merged/closed/
+   present?" fact that shapes the plan (e.g. "milestone Y appears merged") must
+   be checked with `gh pr view`/`gh issue view`/`git log`, not inferred from
+   context or a prior summary — hold the same evidence bar the Explorer already
+   holds for code claims (`file:line`), applied to repo state.
 2. Produce, under `specs/<issue-id>/`:
    - **spec.md** — problem, scope, non-goals, acceptance criteria, risks.
    - **plan.md** — approach, key decisions, **rejected alternatives + why**,

@@ -64,6 +64,12 @@ subagents are for.
      Deep round — reserve Deep review ceremony for the risk-flagged or
      cross-cutting tasks that earned it. Never drop below Express's single-pass
      review, and never skip review on a risk-flagged task regardless of size.
+   - **Risk-route the whole gate stack, not just the model.** `red-team` and
+     full worktree isolation are for `risk:*`-flagged tasks; a non-risk task
+     inside a Deep cycle gets one light cross-model review — no red-team pass,
+     and no worktree isolation when no parallel writer touches the same file.
+     This extends the existing model-tiering (`route-issue`) to the rest of the
+     gate stack: match ceremony to the task's own risk, not the cycle's lane.
 3. **Decompose** into sub-issues — one delegatable unit per Implementer. Each
    sub-issue is a lock (claim-before-work): the Implementer assigns itself before
    starting. **Batch micro-tasks** (trivially small, same component) into one
@@ -98,8 +104,15 @@ The swarm is opaque and token-heavy by nature — counter that with the `run-log
 skill. **You (the Orchestrator) are responsible for emitting every run-log
 event** — this is not delegated to subagents. Whether you spawn a branded
 `swarm:*` agent or a general-purpose Agent-tool subagent, emit `agent_dispatched`
-before the spawn and `agent_returned` (with `--tokens` and `--status`) when it
-returns. A run that skips these events cannot produce a debrief or live checklist.
+**only after the Agent tool call returns an agent/task id** confirming the spawn
+actually happened — not preemptively before invoking it. Under context load it's
+possible to write the log line and never actually call the Agent tool; logging
+after the fact makes that structurally visible instead of leaving a PR with a
+logged-but-nonexistent reviewer. Emit `agent_returned` (with `--tokens` and
+`--status`) when it returns. A run that skips these events cannot produce a
+debrief or live checklist. Periodically reconcile: any `agent_dispatched` with
+no corresponding live task and no matching `agent_returned` is a dropped
+dispatch — re-dispatch it.
 Emit at every boundary: `cycle_started`, `lane_routed`, each
 `agent_dispatched`/`agent_returned`, `dialectic_round`, `gate`, `escalation`,
 PR lifecycle, `cycle_completed`. Have the Scribe keep the **live progress

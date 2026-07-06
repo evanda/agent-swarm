@@ -236,3 +236,10 @@ Format per entry:
 - **Lesson:** When an Implementer or Reviewer determines the issue's literal acceptance criterion can't be met at the in-scope layer, stop and escalate to a human (`needs-human`: keep-open / re-scope / accept-as-inert) rather than reframing-and-closing; the Reviewer separately flags any title/description that overstates the change relative to what was actually achieved.
 - **Scope:** shared.
 - **Status:** promoted-to(route-issue skill, review-checklist skill).
+
+## 2026-07-06 — A ledger pin can be wrong from the moment it's written, not just drift stale later
+- **Context:** Issue #76 flagged (without acting on it) that the `code-review` row's pin, `anthropics/pr-review-toolkit@v1.4.0`, didn't match the live `plugin.json` (`1.0.0`). Issue #78 confirmed via two independent fetches — the plugin.json version and its commit history (one commit total, Oct 2025, unchanged since) — that `v1.4.0` never existed for this plugin; it was likely transcribed from the host repo's own release-tag scheme at adoption time.
+- **Failure class:** The ledger rule "pin by ref/sha, never latest" guards against drift after adoption, but doesn't catch a pin that was simply wrong at the moment it was written — a different, rarer failure mode than the one the rule was designed for.
+- **Lesson:** When a Scout finding can't be confirmed from a single unauthenticated fetch (per the existing "never overwrite a pin on vibes" discipline), file it as a flagged-for-verification note rather than silently trusting or silently ignoring it; the next cycle should close the loop with a second, corroborating source (here: version field + commit history) before editing the pin.
+- **Scope:** shared.
+- **Status:** promoted-to(knowledge/dependencies.md).

@@ -17,6 +17,19 @@ subagents are for.
   conflict resolution each run in their own subagent with its own context
   window, and return only a condensed result. If you find yourself reading large
   files or diffs directly, stop and delegate.
+- **Pick a leaf-shaped agent type for leaf work.** For an independent review,
+  recon pass, or single verification — a task whose contract is "do exactly one
+  pass and report" — dispatch a constrained type with no `Agent` tool
+  (`swarm:reviewer`, `swarm:explorer`, `Explore`), never `general-purpose`.
+  `general-purpose` carries the `Agent` tool itself and can silently recurse
+  into its own sub-fleet, turning one requested review into an unbounded,
+  opaque token spend you never asked for. Reserve `general-purpose` for work
+  you genuinely want to branch further.
+- **You are the sole dispatcher of the Reviewer.** An Implementer that spawns
+  its own reviewer risks a same-model collusion pair and an unlogged, uncounted
+  review you never consumed. If an Implementer reports having done this, treat
+  its self-review as informational only — dispatch the real independent
+  Reviewer (different model) yourself before advancing the gate.
 - **Match effort to complexity.** Pick the cheapest safe lane. Fan-out costs ~10×
   the tokens — reserve it for genuinely decomposable work.
 - **Generation and verification are separate agents on different models.** Pair
@@ -86,6 +99,15 @@ subagents are for.
      in the background; only block the *next dependent* task on it, not the
      whole cycle. Serialize strictly on genuine dependencies (a sync-gate task,
      a shared-contract producer) and human gates — everything else fans out.
+   - **When merging is gated** (a host policy blocks agent-authored merges
+     without human review), honor "X must land before Y" with **stacked PRs**,
+     not by merging X yourself to unblock Y. Base Y's branch on X's branch;
+     GitHub retargets Y to the trunk automatically once X merges. This
+     preserves one-PR-per-issue and bulk human review while letting Y build on
+     X's committed state. Serialize same-file dependents on their shared
+     prerequisite to avoid mutual conflicts. A single integration branch for
+     bulk end-to-end testing before the human's review pass is a reasonable
+     escape hatch when several stacked branches need exercising together.
 4. **Synthesize.** Collect condensed results, resolve cross-task questions,
    update the issue graph, and report status to the human in plain terms.
    **If an agent crashed or was interrupted mid-run:** verify its artifacts against

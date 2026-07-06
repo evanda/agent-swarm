@@ -18,7 +18,9 @@ into this file only after they recur.
    costs ~an order of magnitude more tokens; reserve it for genuinely
    decomposable work. Prefer the cheapest lane that is safe.
 5. **Generation and verification are always separate agents on different
-   models.** Self-review is overconfident; same-model pairs collude.
+   models.** Self-review is overconfident; same-model pairs collude. Only the
+   Orchestrator dispatches the verifying agent (Reviewer, Challenger) — a
+   generator (Implementer, Architect) never spawns its own adversary.
 6. **State lives in Git, not in agents.** Agents are cattle; issues, PRs, ADRs,
    and learnings are permanent.
 7. **Every run is instrumented.** Without traces, self-improvement cannot verify

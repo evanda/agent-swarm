@@ -201,3 +201,38 @@ Format per entry:
 - **Lesson (tentative, not yet actioned):** Consider a self-initiated handoff — after a milestone or a sizeable context load, the Orchestrator writes a compact forward-looking state summary (resembling `resume-cycle`'s rehydration inputs) and a fresh instance picks up from it, retiring the old one. Not yet promoted to a skill: the proposal doesn't specify a concrete trigger threshold or how the handoff differs from an ordinary `resume-cycle` recovery, and there's only one occurrence. Revisit if this recurs or if a concrete context-budget signal is proposed.
 - **Scope:** shared.
 - **Status:** tentative.
+
+## 2026-07-06 — A leaf-shaped task needs a leaf-shaped agent type, or it can recurse into an unbounded sub-fleet
+- **Context:** Issue #69 (spacewars M7/#201) — the orchestrator spawned one cross-model reviewer via `general-purpose`; because that type carries the `Agent` tool itself, the reviewer decided to parallelize and fanned out into ~10 sub-agents, alarming the human (who twice asked if it was stuck) and burning unbounded, unrequested tokens. The review's findings were fine — only the fan-out shape was wrong.
+- **Failure class:** A generator/verifier role whose contract is "do exactly one pass and report" (review, recon, a single verification) silently gains the ability to recurse if dispatched with a type that itself carries the `Agent` tool — the failure is invisible until token spend or a UI hang shows it.
+- **Lesson:** Dispatch leaf-shaped work (independent review, recon, single verification) with a constrained type that has no `Agent` tool (`swarm:reviewer`, `swarm:explorer`, `Explore`), never `general-purpose`; treat `general-purpose` as "may recurse," reserved for tasks you actually want to branch. A same-session note: a spawned sub-agent review does not satisfy the two-party merge-review gate — route a merge-blocking review through the real independent Reviewer role or a human.
+- **Scope:** shared.
+- **Status:** promoted-to(orchestrator.md).
+
+## 2026-07-06 — Review dispatch belongs to the Orchestrator alone; a generator that spawns its own adversary can collude
+- **Context:** Issue #70 (bub #260–#267) — two Implementer subagents spontaneously spawned their own reviewer subagent instead of leaving review to the Orchestrator. No harm this cycle (the Orchestrator's own different-model reviewers ran regardless), but a self-spawned reviewer risks running on the *same* model as the Implementer (violating the adversary rule) and produces an uncontrolled review the Orchestrator never dispatched, logged, or consumed.
+- **Failure class:** A rule stated at the *pair* level ("generation and verification are separate agents on different models") doesn't by itself prevent one member of the pair from self-appointing the other — the dispatch authority needs to be pinned to a single owner, not just the model-difference property.
+- **Lesson:** Only the Orchestrator dispatches the verifying agent (Reviewer, Challenger); a generator (Implementer, Architect) never spawns its own adversary. Its job ends at "open PR + hand off ready-for-review." Hardened directly into the constitution (principle 5) since this is a collusion-risk class, not a tentative one-off.
+- **Scope:** shared.
+- **Status:** promoted-to(constitution.md, implementer.md).
+
+## 2026-07-06 — When merge access is human-gated, honor cross-issue dependencies with stacked PRs, not by merging to unblock
+- **Context:** Issue #71 (bub #260–#267) — the lane flow assumed the Orchestrator could merge a prerequisite PR to unblock dependent work, but the host's auto-mode classifier correctly blocked merging agent-authored PRs without human review ("user will test in bulk at the end"), leaving dependency chains stuck. Basing each dependent branch on its prerequisite's branch (stacked PRs) resolved it with zero merges — GitHub retargets children to the trunk as parents merge.
+- **Failure class:** An orchestration flow that implicitly assumes merge authority breaks the moment that authority is policy-gated; the fix isn't to route around the gate, it's to express the dependency a different way (branch-on-branch instead of merge-then-branch).
+- **Lesson:** When merging is gated, resolve "X must land before Y" as "Y's branch is based on X's branch," not "merge X to unblock Y." Serialize same-file dependents on their shared prerequisite to avoid mutual conflicts; a single integration branch for bulk end-to-end testing before the human's review pass is a reasonable escape hatch.
+- **Scope:** shared.
+- **Status:** promoted-to(orchestrator.md, integrator.md).
+
+## 2026-07-06 — Review-checklist hardening: real-wiring tests for stateful changes, a UTF-8/NUL source-file guard, and revert-to-confirm fix verification
+- **Context:** Issue #72 (bub #260–#267), three concrete review gaps in one cycle: (1) a nav/back-stack integration test re-implemented the shell's handlers instead of rendering the real component, so three real back-stack blockers passed CI; (2) a new JS module contained a raw NUL byte, which git classified as binary (breaking diff/grep/PR render) while local tests still passed; (3) the strongest fix-verifications this cycle reverted just the fix commit, confirmed the regression test failed, then restored it and confirmed it passed.
+- **Failure class:** (1)/(3) are both instances of "a test/verification that doesn't exercise the real thing (real wiring; the bug's actual prior existence) can look sufficient while proving nothing"; (2) is a class of file that silently defeats every text-based review/diff tool while remaining locally "passing."
+- **Lesson:** Reviewer treats a hand-reimplemented handler harness as a red flag for stateful/nav changes and requires real-component/real-testID coverage; flags any new source file git shows as binary (UTF-8/NUL check); and uses revert-to-confirm (revert the fix, confirm the regression test fails, restore, confirm it passes) as standard practice when re-reviewing a blocker fix.
+- **Scope:** shared.
+- **Status:** promoted-to(review-checklist skill).
+
+## 2026-07-06 — A goal found unachievable at the in-scope layer must escalate to a human, not get silently reframed and closed
+- **Context:** Issue #73 (bub #260, Play Console deprecated-setter warning) — mid-implementation the Implementer discovered the flagged calls originate in React Native core itself, unreachable from app code; it reframed the work to a genuine adjacent bug (bar-icon theme tracking) but initially titled the PR as if it had migrated off the deprecated setters. Closing on that title would have auto-closed the issue as resolved when the actual acceptance criterion (the Play Console scan passing) was still unmet.
+- **Failure class:** Discovering mid-work that an issue's literal goal is unachievable at the layer in scope is a scoping decision, not an implementation detail — resolving it unilaterally (reframe + close) can misrepresent what shipped relative to what was asked.
+- **Lesson:** When an Implementer or Reviewer determines the issue's literal acceptance criterion can't be met at the in-scope layer, stop and escalate to a human (`needs-human`: keep-open / re-scope / accept-as-inert) rather than reframing-and-closing; the Reviewer separately flags any title/description that overstates the change relative to what was actually achieved.
+- **Scope:** shared.
+- **Status:** promoted-to(route-issue skill, review-checklist skill).

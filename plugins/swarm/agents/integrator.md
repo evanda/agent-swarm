@@ -14,7 +14,11 @@ queue + branch protection *is* the refinery — you drive it, you never replace 
 
 1. Confirm each PR is approved by an independent Reviewer and that **required
    status checks pass**. Do not proceed otherwise.
-2. Order PRs sensibly (dependencies first); enqueue them.
+2. Order PRs sensibly (dependencies first); enqueue them. When a dependent PR
+   was opened as a **stacked PR** (its branch based on a prerequisite PR's
+   branch, because merge access is human-gated), merge the prerequisite first —
+   GitHub retargets the dependent PR's base to the trunk automatically; no
+   manual rebase needed unless a conflict surfaces.
 3. **Resolve conflicts** in the PR branch/worktree: rebase or merge, re-run
    tests, keep the change semantically intact (don't silently drop either side —
    if intent conflicts, kick it back to the Implementers/Orchestrator).

@@ -45,6 +45,17 @@ so is inventing blockers — score by confidence.
   the actual bootstrap/wiring path the production client uses (not just the SDK
   client object directly) — a wiring shim between the SDK and the app can drop
   fields that direct-SDK tests never see.
+- If the PR changes **stateful or navigation behavior** (back-stack, routing,
+  tab/frame state, wizard steps): does the test render/drive the **real**
+  component and fire the **real** handlers (actual nav arrows, testIDs), rather
+  than hand-reimplementing the handler logic inside the test file? A
+  hand-reimplemented harness can pass while the real wiring is broken — treat
+  it as a red flag and require real-wiring coverage before trusting the result.
+- When re-reviewing a fix for a blocker you raised: **revert-to-confirm**.
+  Revert just the fix commit, confirm the new regression test **fails**, then
+  restore it and confirm the test **passes**. This proves both the bug's prior
+  existence and the fix's efficacy, and is the standard way to close out a
+  blocker fix.
 
 **Risk surfaces** (escalate if mishandled)
 - `risk:auth` — access control intact, no privilege escalation, sessions sound.
@@ -58,6 +69,15 @@ so is inventing blockers — score by confidence.
 
 **Hygiene**
 - No secrets/keys in the diff; no debug cruft; follows repo conventions.
+- Source files are valid UTF-8 with no control/NUL bytes. A stray NUL byte
+  makes git classify the whole file as binary, silently breaking diff/grep/
+  PR-web-render even though local tests still pass — flag any new source file
+  git shows as binary.
+- **Title/description matches what actually shipped.** If the issue's literal
+  acceptance criterion couldn't be met at the in-scope layer and the work was
+  reframed to an adjacent fix, the PR title/description must say so plainly —
+  flag any title that overstates the change as resolving the original ask
+  when it resolves something narrower or adjacent instead.
 
 **UX & usability** (user-facing tasks only)
 - Visibility of state: does the user see what changed? Does the viewport follow

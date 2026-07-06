@@ -61,6 +61,18 @@ Lane sets the dialectic depth automatically:
 | Standard | cap 2 | none (unless risk flag) | no |
 | Deep | cap 3 per PR | Architect↔Challenger cap 2, before fan-out | if any risk flag |
 
+## Mid-work escalation (a lane decision, not just an intake one)
+
+If an Implementer or Reviewer determines, mid-work, that the issue's **literal**
+acceptance criterion cannot be met at the layer in scope (e.g. the flagged
+behavior actually originates in a dependency/framework the fix can't reach),
+**stop and escalate the scoping decision to a human** — `needs-human`, with the
+discovery stated plainly — rather than silently reframing to an adjacent fix
+and closing the original issue. The human decides: keep-open, re-scope, or
+accept-as-inert. This applies even if a genuine adjacent bug was found and
+fixed along the way; the adjacent fix doesn't retroactively resolve the
+original ask.
+
 ## Model tier (stamp per task/role)
 
 Alongside the lane, stamp a **model tier per task/role** from the matrix in

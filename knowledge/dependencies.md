@@ -14,8 +14,8 @@ reviewed on every relevant PR.
 ```yaml
 - capability: code-review
   posture: adapt
-  upstream: anthropics/pr-review-toolkit@v1.4.0
-  delta: "Added our severity schema (blocker/concern/nit) + iterative loop."
+  upstream: anthropics/pr-review-toolkit@1.0.0 (commit f7ab5c7, bundled 2025-10-09, unchanged since)
+  delta: "Added our severity schema (blocker/concern/nit) + iterative loop. Prior pin (v1.4.0) was never a real tag for this plugin — verified 2026-07-07 that the bundled plugin.json has always read 1.0.0 and its history is the single bundling commit f7ab5c7; v1.4.0 was likely transcribed from claude-code's own core release tag by mistake. Re-checked the revisit_if against the bundled README: iteration is still manual/user-re-invoked, not an automated loop — not tripped."
   revisit_if: "pr-review-toolkit adds native multi-round iteration → drop our wrapper."
 
 - capability: lane-router
@@ -26,8 +26,8 @@ reviewed on every relevant PR.
 
 - capability: spec-plan-tasks
   posture: adapt
-  upstream: github/spec-kit@v0.12.4
-  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). v0.12.2 retired the Windsurf/iflow integrations and bounded fan-out max_concurrency; v0.12.3 was a maintenance/integration-hygiene patch; v0.12.4 (2026-07-02) adds Python script-type support, a private-repo release-asset URL fix, template-interpolation fixes, and label-driven bug-fix/bug-test agentic workflows — still maintenance/plumbing. Our wrapper stays narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates — the revisit_if trigger (native risk-aware gating) was not tripped by any release through v0.12.4; the `gate` entries in its changelog are a generic, manually-authored approval-checkpoint step type, not a built-in risk classifier."
+  upstream: github/spec-kit@v0.12.5
+  delta: "Wraps Spec Kit (constitution→specify→plan→tasks→clarify). v0.12.2 retired the Windsurf/iflow integrations and bounded fan-out max_concurrency; v0.12.3 was a maintenance/integration-hygiene patch; v0.12.4 (2026-07-02) adds Python script-type support, a private-repo release-asset URL fix, template-interpolation fixes, and label-driven bug-fix/bug-test agentic workflows; v0.12.5 (2026-07-06) is a further maintenance patch (case-insensitive workflow-gate reject-option matching, bundler catalog-URL validation, more template-interpolation fixes) — batched into this cycle's re-pin per the weekly cadence rather than filed separately, since it carries no revisit_if signal or wrapper change on its own. Our wrapper stays narrowed to risk-aware lane mapping (lane:* × risk:*) on top of their phase gates — the revisit_if trigger (native risk-aware gating) was not tripped by any release through v0.12.5; the `gate` entries in its changelog are a generic, manually-authored approval-checkpoint step type, not a built-in risk classifier."
   revisit_if: "Spec Kit ships native *risk-aware* gating that maps to our auth/data/money/destructive rubric → drop our lane-mapping layer."
 
 - capability: feature-recon (Explorer)

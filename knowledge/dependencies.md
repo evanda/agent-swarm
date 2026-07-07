@@ -14,8 +14,8 @@ reviewed on every relevant PR.
 ```yaml
 - capability: code-review
   posture: adapt
-  upstream: anthropics/pr-review-toolkit@v1.4.0
-  delta: "Added our severity schema (blocker/concern/nit) + iterative loop."
+  upstream: anthropics/pr-review-toolkit@1.0.0 (commit f7ab5c7, bundled 2025-10-09, unchanged since)
+  delta: "Added our severity schema (blocker/concern/nit) + iterative loop. Prior pin (v1.4.0) was corrected 2026-07-07 (#78/#76 finding 4): that tag never existed for this plugin — its plugin.json has read 1.0.0 since the single bundling commit f7ab5c7 (Oct 9 2025), with zero commits since. v1.4.0 was likely transcribed from claude-code's own core release versioning rather than the plugin's static 1.0.0."
   revisit_if: "pr-review-toolkit adds native multi-round iteration → drop our wrapper."
 
 - capability: lane-router

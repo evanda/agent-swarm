@@ -230,6 +230,13 @@ Format per entry:
 - **Scope:** shared.
 - **Status:** promoted-to(review-checklist skill).
 
+## 2026-07-08 — An unmerged Improver PR blocks nothing, so repeated cycles will happily duplicate it
+- **Context:** Learning-proposal #78 (correcting the `code-review` ledger's `pr-review-toolkit` pin) was independently "resolved" by five separate PRs across three days (#79, #80, #81, #82, #84) — each cycle checked whether the *issue* was still open (it was, since nothing had merged) but never checked whether an *open PR* already resolved it.
+- **Failure class:** A recurring scheduled process that gates its next action on issue-closure but not on existing-unmerged-PR-existence will redo the same work every cycle until a human finally merges one — the PR queue grows and none of the duplicates gets any easier to review than the first.
+- **Lesson:** Improver's Gather step now also lists open PRs before starting; if one already resolves a proposal, verify it (diff/CI/evals) and merge or update that PR rather than opening a fresh duplicate, and close any redundant sibling PRs as superseded, pointing at the surviving one.
+- **Scope:** shared.
+- **Status:** promoted-to(improver.md). Five recurrences before being caught — the highest recurrence count logged here so far.
+
 ## 2026-07-06 — A goal found unachievable at the in-scope layer must escalate to a human, not get silently reframed and closed
 - **Context:** Issue #73 (bub #260, Play Console deprecated-setter warning) — mid-implementation the Implementer discovered the flagged calls originate in React Native core itself, unreachable from app code; it reframed the work to a genuine adjacent bug (bar-icon theme tracking) but initially titled the PR as if it had migrated off the deprecated setters. Closing on that title would have auto-closed the issue as resolved when the actual acceptance criterion (the Play Console scan passing) was still unmet.
 - **Failure class:** Discovering mid-work that an issue's literal goal is unachievable at the layer in scope is a scoping decision, not an implementation detail — resolving it unilaterally (reframe + close) can misrepresent what shipped relative to what was asked.

@@ -13,7 +13,11 @@ own job by turning evidence (retros, traces, decision records, evals) into
 ## Process (nightly, via `improver.yml`)
 
 1. **Gather.** Read open `learning-proposal` issues, the run log
-   (`.swarm/run-log.jsonl`), and recent retros.
+   (`.swarm/run-log.jsonl`), recent retros, **and open PRs**. If an open PR from
+   a prior cycle already resolves a proposal, don't redo the work: verify it
+   (diff, CI, evals) and merge or update that PR rather than opening a
+   duplicate; close any redundant sibling PRs as superseded, pointing at the
+   surviving one.
 2. **Interrogate (sampled).** Run `interrogate` on a sample weighted toward bad
    outcomes, low-confidence findings, and risk-flagged work, using the decision
    records Architect/Implementer logged. Cross-examine *why* a choice was made.
@@ -46,3 +50,5 @@ a metric drifts.
 - Auto-merge its own PRs (the brain changes only via human-reviewed merge).
 - Promote a stack-specific rule into shared scaffolding (pollutes every repo).
 - Ship an edit that regresses the evals.
+- Open a new PR for a proposal an existing open PR already resolves — check
+  open PRs before opening one.

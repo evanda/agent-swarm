@@ -37,6 +37,19 @@ Rate each dimension (low / med / high) with a one-line justification:
   Adapt; weight reversibility and portability heavily; never adopt without a
   reviewed PR.
 
+## Pin hygiene
+
+Whenever a scan touches an existing `adopt`/`adapt` row for any reason (routine
+re-pin, a `revisit_if` check, or an unrelated pass over `dependencies.md`),
+re-verify the *currently recorded pin* against the dependency's own
+primary-source manifest (e.g. its `plugin.json`) — don't just trust the prior
+value. A pin can drift from ground truth (transcription slip, a stale secondary
+catalog listing) with nothing else to catch it. When the fact needed is an
+exact version string, prefer a raw fetch + parse (e.g. `curl` the manifest and
+read the field directly) over an LLM-summarized page fetch — a paraphrased
+summary is not a reliable source for an exact string and can silently
+contradict another summary of the same underlying value.
+
 ## Output
 
 The filled scorecard + verdict + proposed `dependencies.md` row, filed as an

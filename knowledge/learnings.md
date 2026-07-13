@@ -200,7 +200,7 @@ Format per entry:
 - **Failure class:** Unbounded context growth in a persistent role (the Orchestrator, unlike cattle subagents, is the main session instance and doesn't naturally reset) degrades judgment quality with no built-in checkpoint.
 - **Lesson (tentative, not yet actioned):** Consider a self-initiated handoff — after a milestone or a sizeable context load, the Orchestrator writes a compact forward-looking state summary (resembling `resume-cycle`'s rehydration inputs) and a fresh instance picks up from it, retiring the old one. Not yet promoted to a skill: the proposal doesn't specify a concrete trigger threshold or how the handoff differs from an ordinary `resume-cycle` recovery, and there's only one occurrence. Revisit if this recurs or if a concrete context-budget signal is proposed.
 - **Scope:** shared.
-- **Status:** tentative.
+- **Status:** tentative. Checked 2026-07-09: no recurrence since 2026-07-02 and no concrete trigger threshold proposed yet; stays tentative per anti-thrash (harden only on recurrence). Closing #65 — this entry is the durable record; reopen or file a fresh proposal if it recurs.
 
 ## 2026-07-06 — A leaf-shaped task needs a leaf-shaped agent type, or it can recurse into an unbounded sub-fleet
 - **Context:** Issue #69 (spacewars M7/#201) — the orchestrator spawned one cross-model reviewer via `general-purpose`; because that type carries the `Agent` tool itself, the reviewer decided to parallelize and fanned out into ~10 sub-agents, alarming the human (who twice asked if it was stuck) and burning unbounded, unrequested tokens. The review's findings were fine — only the fan-out shape was wrong.

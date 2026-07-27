@@ -20,6 +20,13 @@ Format per entry:
 
 <!-- New learnings are appended below this line. -->
 
+## 2026-07-27 — A plugin bundled in two repos can be two independently-versioned lineages, not one fact viewed twice
+- **Context:** Issue #89/PR #90 (2026-07-20) re-pinned `write-time-security-guard` and claimed `plugins/security-guidance/.claude-plugin/plugin.json` on `anthropics/claude-code@main` *and* the `claude-plugins-official` marketplace.json both read `2.0.6`, treating the agreement as corroboration of the pin. This cycle's scan (raw `curl`+parse of both, per the existing pin-hygiene discipline) found the claim itself was wrong: the `anthropics/claude-code` monorepo copy is a separate, lagging fork frozen at `2.0.0` since a May 2026 bump, untouched since; only `claude-plugins-official`'s marketplace.json — the actual install/consumption source — was at `2.0.6`, unchanged. Corrected in #91/dependencies.md.
+- **Failure class:** The pin-hygiene rule ("verify against the primary-source manifest") assumed that two same-named files in two different repos are two views onto one fact. Here they're independently-versioned lineages — one a stale bundled snapshot, one the actively-maintained catalog — so cross-checking against the wrong one produced a false corroboration rather than a caught discrepancy.
+- **Lesson:** When a plugin exists in more than one repo (e.g. bundled inside `anthropics/claude-code` vs. published in `claude-plugins-official`), first confirm which one is the actual install/consumption source and treat only that one as ground truth. A second repo's copy is not automatically corroborating evidence — confirm it's the same lineage (not a separate fork/snapshot) before using it to cross-check.
+- **Scope:** shared.
+- **Status:** promoted-to(scout-scan skill) — applied directly given it had already produced a wrong claim in a live, currently-open PR (#90), not just a hypothetical; revisit if a third repo-lineage-confusion instance surfaces elsewhere in the ledger.
+
 ## 2026-07-02 — "Real-time observability" doesn't require a web app when the durable record is already a flat event log
 - **Context:** Issue #29 — the ask was ambient, no-poll visibility into an in-flight run (one lane per role, live status) instead of repeatedly re-running `/swarm:status`. Framed as "swimlane visualizer," it read like a UI build (Canvas/SVG widget, a server, live wiring) — out of scope for a scaffolding-doc edit and deferred by two prior Improver cycles for that reason.
 - **Failure class:** The ask's *name* implied more infrastructure than the ask's *substance* needed — every event the visualizer would render already lives in a flat, already-instrumented local file (`.swarm/run-log.jsonl`); the gap was a redraw loop, not a new architecture.

@@ -50,6 +50,13 @@ read the field directly) over an LLM-summarized page fetch — a paraphrased
 summary is not a reliable source for an exact string and can silently
 contradict another summary of the same underlying value.
 
+If a plugin exists in more than one repo (e.g. bundled inside
+`anthropics/claude-code` vs. published in `claude-plugins-official`), first
+confirm which one is the actual install/consumption source before treating a
+second repo's copy as corroboration — they can be independently-versioned
+lineages (one a stale bundled snapshot, one the actively-maintained catalog)
+rather than two views of the same fact.
+
 ## Output
 
 The filled scorecard + verdict + proposed `dependencies.md` row, filed as an

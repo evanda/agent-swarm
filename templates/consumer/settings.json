@@ -1,7 +1,7 @@
 {
   "extraKnownMarketplaces": {
     "swarm": {
-      "source": { "source": "github", "repo": "evanda/agent-swarm", "ref": "v0.4.6" }
+      "source": { "source": "github", "repo": "evanda/agent-swarm", "ref": "v0.4.7" }
     }
   },
   "enabledPlugins": ["swarm@swarm"]
